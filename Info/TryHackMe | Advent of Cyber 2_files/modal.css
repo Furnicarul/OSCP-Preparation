@@ -1,0 +1,26 @@
+.modalIcon {
+  width: 200px;
+}
+
+.icon-box {
+  color: #fff;
+  position: absolute;
+  margin: 0 auto;
+  left: 0;
+  right: 0;
+  top: -50px;
+  width: 95px;
+  height: 95px;
+  border-radius: 50%;
+  z-index: 9;
+  background: #82ce34;
+  padding: 16px;
+  text-align: center;
+  box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1);
+}
+
+.icon-box > i {
+  font-size: 58px;
+  position: relative;
+  top: 3px;
+}

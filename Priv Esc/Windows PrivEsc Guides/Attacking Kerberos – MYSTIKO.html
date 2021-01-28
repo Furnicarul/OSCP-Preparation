@@ -1,0 +1,1658 @@
+<!DOCTYPE html>
+<html lang="en-US"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+						 
+		<title>Attacking Kerberos – MYSTIKO</title>
+<link rel="dns-prefetch" href="https://s.w.org/">
+<link rel="alternate" type="application/rss+xml" title="MYSTIKO » Feed" href="https://mystiko.sh/">
+<link rel="alternate" type="application/rss+xml" title="MYSTIKO » Comments Feed" href="https://mystiko.sh/?feed=comments-rss2">
+<link rel="alternate" type="application/rss+xml" title="MYSTIKO » Attacking Kerberos Comments Feed" href="https://mystiko.sh/?feed=rss2&amp;p=714">
+		<script type="text/javascript">
+			window._wpemojiSettings = {"baseUrl":"https:\/\/s.w.org\/images\/core\/emoji\/13.0.0\/72x72\/","ext":".png","svgUrl":"https:\/\/s.w.org\/images\/core\/emoji\/13.0.0\/svg\/","svgExt":".svg","source":{"concatemoji":"https:\/\/mystiko.sh\/wp-includes\/js\/wp-emoji-release.min.js?ver=5.5.1"}};
+			!function(e,a,t){var r,n,o,i,p=a.createElement("canvas"),s=p.getContext&&p.getContext("2d");function c(e,t){var a=String.fromCharCode;s.clearRect(0,0,p.width,p.height),s.fillText(a.apply(this,e),0,0);var r=p.toDataURL();return s.clearRect(0,0,p.width,p.height),s.fillText(a.apply(this,t),0,0),r===p.toDataURL()}function l(e){if(!s||!s.fillText)return!1;switch(s.textBaseline="top",s.font="600 32px Arial",e){case"flag":return!c([127987,65039,8205,9895,65039],[127987,65039,8203,9895,65039])&&(!c([55356,56826,55356,56819],[55356,56826,8203,55356,56819])&&!c([55356,57332,56128,56423,56128,56418,56128,56421,56128,56430,56128,56423,56128,56447],[55356,57332,8203,56128,56423,8203,56128,56418,8203,56128,56421,8203,56128,56430,8203,56128,56423,8203,56128,56447]));case"emoji":return!c([55357,56424,8205,55356,57212],[55357,56424,8203,55356,57212])}return!1}function d(e){var t=a.createElement("script");t.src=e,t.defer=t.type="text/javascript",a.getElementsByTagName("head")[0].appendChild(t)}for(i=Array("flag","emoji"),t.supports={everything:!0,everythingExceptFlag:!0},o=0;o<i.length;o++)t.supports[i[o]]=l(i[o]),t.supports.everything=t.supports.everything&&t.supports[i[o]],"flag"!==i[o]&&(t.supports.everythingExceptFlag=t.supports.everythingExceptFlag&&t.supports[i[o]]);t.supports.everythingExceptFlag=t.supports.everythingExceptFlag&&!t.supports.flag,t.DOMReady=!1,t.readyCallback=function(){t.DOMReady=!0},t.supports.everything||(n=function(){t.readyCallback()},a.addEventListener?(a.addEventListener("DOMContentLoaded",n,!1),e.addEventListener("load",n,!1)):(e.attachEvent("onload",n),a.attachEvent("onreadystatechange",function(){"complete"===a.readyState&&t.readyCallback()})),(r=t.source||{}).concatemoji?d(r.concatemoji):r.wpemoji&&r.twemoji&&(d(r.twemoji),d(r.wpemoji)))}(window,document,window._wpemojiSettings);
+		</script><script src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/wp-emoji-release.js" type="text/javascript" defer="defer"></script>
+		<style type="text/css">
+img.wp-smiley,
+img.emoji {
+	display: inline !important;
+	border: none !important;
+	box-shadow: none !important;
+	height: 1em !important;
+	width: 1em !important;
+	margin: 0 .07em !important;
+	vertical-align: -0.1em !important;
+	background: none !important;
+	padding: 0 !important;
+}
+</style>
+	<link rel="stylesheet" id="wp-block-library-css" href="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/style.css" type="text/css" media="all">
+<link rel="stylesheet" id="thumbs_rating_styles-css" href="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/style_002.css" type="text/css" media="all">
+<link rel="stylesheet" id="yop-public-css" href="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/yop-poll-public-6.css" type="text/css" media="all">
+<link rel="stylesheet" id="popup-maker-site-css" href="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/pum-site-styles.css" type="text/css" media="all">
+<link rel="stylesheet" id="baskerville_googleFonts-css" href="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/css.css" type="text/css" media="all">
+<link rel="stylesheet" id="baskerville_style-css" href="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/style_003.css" type="text/css" media="all">
+<script type="text/javascript" src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/jquery.js" id="jquery-core-js"></script>
+<script type="text/javascript" id="thumbs_rating_scripts-js-extra">
+/* <![CDATA[ */
+var thumbs_rating_ajax = {"ajax_url":"https:\/\/mystiko.sh\/wp-admin\/admin-ajax.php","nonce":"9677dcb321"};
+/* ]]> */
+</script>
+<script type="text/javascript" src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/general.js" id="thumbs_rating_scripts-js"></script>
+<script type="text/javascript" id="yop-public-js-extra">
+/* <![CDATA[ */
+var objectL10n = {"yopPollParams":{"urlParams":{"ajax":"https:\/\/mystiko.sh\/wp-admin\/admin-ajax.php","wpLogin":"https:\/\/mystiko.sh\/wp-login.php?redirect_to=https%3A%2F%2Fmystiko.sh%2Fwp-admin%2Fadmin-ajax.php%3Faction%3Dyop_poll_record_wordpress_vote"},"apiParams":{"reCaptcha":{"siteKey":""},"reCaptchaV2Invisible":{"siteKey":""}},"captchaParams":{"imgPath":"https:\/\/mystiko.sh\/wp-content\/plugins\/yop-poll\/public\/assets\/img\/","url":"https:\/\/mystiko.sh\/wp-content\/plugins\/yop-poll\/app.php","accessibilityAlt":"Sound icon","accessibilityTitle":"Accessibility option: listen to a question and answer it!","accessibilityDescription":"Type below the <strong>answer<\/strong> to what you hear. Numbers or words:","explanation":"Click or touch the <strong>ANSWER<\/strong>","refreshAlt":"Refresh\/reload icon","refreshTitle":"Refresh\/reload: get new images and accessibility option!"},"voteParams":{"invalidPoll":"Invalid Poll","noAnswersSelected":"No answer selected","minAnswersRequired":"At least {min_answers_allowed} answer(s) required","maxAnswersRequired":"A max of {max_answers_allowed} answer(s) accepted","noAnswerForOther":"No other answer entered","noValueForCustomField":"{custom_field_name} is required","consentNotChecked":"You must agree to our terms and conditions","noCaptchaSelected":"Captcha is required","thankYou":"Thank you for your vote"},"resultsParams":{"singleVote":"vote","multipleVotes":"votes","singleAnswer":"answer","multipleAnswers":"answers"}}};
+/* ]]> */
+</script>
+<script type="text/javascript" src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/yop-poll-public-6.js" id="yop-public-js"></script>
+<script type="text/javascript" src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/imagesloaded.js" id="imagesloaded-js"></script>
+<script type="text/javascript" src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/masonry.js" id="masonry-js"></script>
+<script type="text/javascript" src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/jquery_002.js" id="baskerville_flexslider-js"></script>
+<script type="text/javascript" src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/global.js" id="baskerville_global-js"></script>
+<link rel="https://api.w.org/" href="https://mystiko.sh/index.php?rest_route=/"><link rel="alternate" type="application/json" href="https://mystiko.sh/index.php?rest_route=/wp/v2/posts/714"><link rel="EditURI" type="application/rsd+xml" title="RSD" href="https://mystiko.sh/xmlrpc.php?rsd">
+<link rel="wlwmanifest" type="application/wlwmanifest+xml" href="https://mystiko.sh/wp-includes/wlwmanifest.xml"> 
+<link rel="prev" title="The art of gaining root" href="https://mystiko.sh/?p=699">
+<link rel="next" title="Engine" href="https://mystiko.sh/?p=716">
+<meta name="generator" content="WordPress 5.5.1">
+<link rel="canonical" href="https://mystiko.sh/?p=714">
+<link rel="shortlink" href="https://mystiko.sh/?p=714">
+<link rel="alternate" type="application/json+oembed" href="https://mystiko.sh/index.php?rest_route=%2Foembed%2F1.0%2Fembed&amp;url=https%3A%2F%2Fmystiko.sh%2F%3Fp%3D714">
+<link rel="alternate" type="text/xml+oembed" href="https://mystiko.sh/index.php?rest_route=%2Foembed%2F1.0%2Fembed&amp;url=https%3A%2F%2Fmystiko.sh%2F%3Fp%3D714&amp;format=xml">
+<style type="text/css">.recentcomments a{display:inline !important;padding:0 !important;margin:0 !important;}</style><style type="text/css" id="custom-background-css">
+body.custom-background { background-image: url("https://mystiko.sh/wp-content/uploads/2019/11/2.jpg"); background-position: left top; background-size: auto; background-repeat: repeat; background-attachment: scroll; }
+</style>
+	<link rel="icon" href="https://mystiko.sh/wp-content/uploads/2019/11/cropped-mystiko-32x32.jpeg" sizes="32x32">
+<link rel="icon" href="https://mystiko.sh/wp-content/uploads/2019/11/cropped-mystiko-192x192.jpeg" sizes="192x192">
+<link rel="apple-touch-icon" href="https://mystiko.sh/wp-content/uploads/2019/11/cropped-mystiko-180x180.jpeg">
+<meta name="msapplication-TileImage" content="https://mystiko.sh/wp-content/uploads/2019/11/cropped-mystiko-270x270.jpeg">
+		<style type="text/css" id="wp-custom-css">
+			@font-face {
+  font-family: 'Tesla';
+  src: url("wp-content/tesla.ttf");
+}
+@font-face {
+  font-family: 'Terminus';
+  src: url("wp-content/terminus.ttf");
+}
+::placeholder, .blog-description{
+	color: #A1F9FB;
+}
+.post-excerpt p, .widget-content p, .post-content, .comment-content, .comment-form-comment, .comment-form-comment #comment{
+	color: white;
+	font-family: terminus
+}
+.post{
+	border: 1px solid #98ce00;
+	background-color: #272822;
+}
+.post-header{
+	border-bottom-color: #98ce00;
+}
+.post-header .post-title a{
+	color: #FD961F;
+}
+.post .post-header::after, .page .post-header::after{
+	border: none;
+}
+.post .post-header::before, .page .post-header::before{
+	border: none;
+}
+.posts .post-meta{
+	background-color: #272822;
+}
+.post-content a{
+	text-decoration: underline;
+	color: #A5E12D;
+}
+.post-content h1, .post-content h2{
+	color: #FD961F;
+}
+.main-menu > li > a{
+	color: #A5E12D;
+}
+.blog-title{
+	font-size: 2.5em;
+}
+.blog-title a{
+	font-family: Tesla;
+	color: #A5E12D;
+}
+.sidebar{
+	background-color: #272822;
+	border: 1px solid #98ce00;
+}
+.sidebar .widget{
+	border-top: 1px solid #98ce00;
+}
+.widget-title, .widget-content ul li::before, .comment-reply-title{
+	color: #FD961F;
+}
+.wrapper .searchform .s, .comment-inner{
+	background-color: #272822;
+	border: 1px solid #98ce00;
+}
+.content .comments, .comment-respond, .bg-graphite{
+	background-color: #272822;
+}
+.comment-inner::after{
+	border-right-color: #FD961F;
+}
+.comments-title, .comment-header cite a{
+	color: #FD961F;
+}
+.comment-form input[type="text"], .comment-form input[type="email"], .comment-form textarea{
+	background-color: #272822;
+	border: 1px solid #A5E12D;
+}
+.comments-title-container{
+	border-bottom: 1px solid #FD961F;
+}
+.comment-header p, .comment-header p a{
+	color: #A5E12D;
+}
+.comment-respond{
+	border-top: 1px solid #A5E12D;
+}
+.logged-in-as :nth-child(2){
+	color: #F92672;
+}
+.single .post-title{
+	color: #FD961F;
+}
+.bg-dark{
+	background-color: #272822;
+}
+.wrapper{
+}
+.visualCaptcha-explanation{
+	color: black !important;
+}
+.visualCaptcha-possibilities .img{
+	background-color: grey;
+	border: 1px solid #FD961F;
+}
+.visualCaptcha-refresh-button, .visualCaptcha-accessibility-button{
+	background-color: grey;
+}
+.progress-bar{
+	background-color: #A5E12D !important;
+}
+.wp-block-image img{
+	display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+.credits img{
+	height: 40px;
+	position: relative;
+	top: 11px;
+}
+code{
+	background: none;
+}		</style>
+			
+	<style type="text/css" id="yop-poll-custom-css-00daafefe10fcc3de6a72081acbdf172">.basic-yop-poll-container[data-uid="00daafefe10fcc3de6a72081acbdf172"] .basic-vote {
+									text-align: center;
+								}</style></head>
+	
+	<body class="post-template-default single single-post postid-714 single-format-standard custom-background no-featured-image single single-post">
+
+		
+		<a class="skip-link button" href="#site-content">Skip to the content</a>
+	
+		<div class="header section small-padding bg-dark bg-image" style="background-image: url( https://mystiko.sh/wp-content/uploads/2019/11/cropped-2.jpg );">
+		
+			<div class="cover"></div>
+			
+			<div class="header-search-block bg-graphite hidden">
+				<form role="search" method="get" class="searchform" action="https://mystiko.sh/">
+	<label for="search-form-5f5b4c82a333f">
+		<span class="screen-reader-text">Search for:</span>
+		<input type="search" id="search-form-5f5b4c82a333f" class="search-field" placeholder="Search form" name="s">
+	</label>
+	<input type="submit" class="searchsubmit" value="Search">
+</form>
+			</div><!-- .header-search-block -->
+					
+			<div class="header-inner section-inner">
+			
+				
+					<div class="blog-title">
+						<a href="https://mystiko.sh/" rel="home">MYSTIKO</a>
+					</div>
+				
+											<h3 class="blog-description">Secrets are meant to be secret</h3>
+									
+											
+			</div><!-- .header-inner -->
+						
+		</div><!-- .header -->
+		
+		<div class="navigation section no-padding bg-dark">
+		
+			<div class="navigation-inner section-inner">
+			
+				<button class="nav-toggle toggle fleft hidden">
+					
+					<div class="bar"></div>
+					<div class="bar"></div>
+					<div class="bar"></div>
+					
+				</button>
+						
+				<ul class="main-menu">
+				
+					<li id="menu-item-11" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-11"><a href="https://mystiko.sh/">Home</a></li>
+<li id="menu-item-235" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-235"><a href="https://mystiko.store/">Store</a></li>
+<li id="menu-item-281" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-281"><a href="https://mystiko.sh/?page_id=279">CTF</a></li>
+<li id="menu-item-377" class="popmake-374 menu-item menu-item-type-custom menu-item-object-custom menu-item-377 pum-trigger" style="cursor: pointer;"><a href="#">Machine voting</a></li>
+<li id="menu-item-10" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-10"><a href="https://mystiko.sh/?page_id=7">About</a></li>
+											
+				</ul><!-- .main-menu -->
+				 
+				<button class="search-toggle toggle fright">
+					<span class="screen-reader-text">Toggle search field</span>
+				</button>
+				 
+				<div class="clear"></div>
+				 
+			</div><!-- .navigation-inner -->
+			
+		</div><!-- .navigation -->
+		
+		<div class="mobile-navigation section bg-graphite no-padding hidden">
+					
+			<ul class="mobile-menu">
+			
+				<li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-11"><a href="https://mystiko.sh/">Home</a></li>
+<li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-235"><a href="https://mystiko.store/">Store</a></li>
+<li class="menu-item menu-item-type-post_type menu-item-object-page menu-item-281"><a href="https://mystiko.sh/?page_id=279">CTF</a></li>
+<li class="popmake-374 menu-item menu-item-type-custom menu-item-object-custom menu-item-377 pum-trigger" style="cursor: pointer;"><a href="#">Machine voting</a></li>
+<li class="menu-item menu-item-type-post_type menu-item-object-page menu-item-10"><a href="https://mystiko.sh/?page_id=7">About</a></li>
+										
+			 </ul><!-- .main-menu -->
+		
+		</div><!-- .mobile-navigation -->
+<div class="wrapper section medium-padding" id="site-content">
+										
+	<div class="section-inner">
+	
+		<div class="content fleft">
+												        
+									
+				<div id="post-714" class="post-714 post type-post status-publish format-standard hentry category-uncategorized">
+
+									
+					<div class="post-header">
+
+												
+						    <h1 class="post-title"><a href="https://mystiko.sh/?p=714" rel="bookmark">Attacking Kerberos</a></h1>
+
+											    
+					</div><!-- .post-header -->
+					
+																			                                    	    
+					<div class="post-content">
+						
+						
+<p><strong>NOTICE: (SPOILER!!) If you would like to solve it by yourself, don’t read further.</strong></p>
+
+
+
+<p>Today let’s play&nbsp; Tryhackme’s Attackingkerberos at<a href="https://tryhackme.com/room/attackingkerberos">https://tryhackme.com/room/attackingkerberos</a><a>[Task 1]&nbsp;Introduction</a></p>
+
+
+
+<p>This room will cover all of the basics of attacking Kerberos the windows ticket-granting service; we’ll cover the following:</p>
+
+
+
+<ul><li>Initial enumeration using tools like Kerbrute and Rubeus</li><li>Kerberoasting</li><li>AS-REP Roasting with Rubeus and Impacket</li><li>Golden/Silver Ticket Attacks</li><li>Pass the Ticket</li><li>Skeleton key attacks using mimikatz</li></ul>
+
+
+
+<p>This room will be related to very real-world applications and will 
+most likely not help with any CTFs however it will give you great 
+starting knowledge of how to escalate your privileges to a domain admin 
+by attacking Kerberos and allow you to take over and control a network.</p>
+
+
+
+<p>It is recommended to have knowledge of general post-exploitation, 
+active directory basics, and windows command line to be successful with 
+this room.</p>
+
+
+
+<figure class="wp-block-image"><img src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/2dq2jLY.png" alt=""></figure>
+
+
+
+<p>What is Kerberos? –</p>
+
+
+
+<p>Kerberos is the default authentication service for Microsoft Windows 
+domains. It is intended to be more “secure” than NTLM by using third 
+party ticket authorization as well as stronger encryption. Even though 
+NTLM has a lot more attack vectors to choose from Kerberos still has a 
+handful of underlying vulnerabilities just like NTLM that we can use to 
+our advantage.</p>
+
+
+
+<p>Common Terminology –</p>
+
+
+
+<ul><li>Ticket Granting Ticket (TGT) – A ticket-granting ticket is an 
+authentication ticket used to request service tickets from the TGS for 
+specific resources from the domain.</li><li>Key Distribution Center 
+(KDC) – The Key Distribution Center is a service for issuing TGTs and 
+service tickets that consists of the Authentication Service and the 
+Ticket Granting Service.</li><li>Authentication Service (AS) – The 
+Authentication Service issues TGTs to be used by the TGS in the 
+domain&nbsp;to request access to other machines and service tickets.</li><li>Ticket Granting Service (TGS) – The Ticket Granting Service takes the TGT and returns a ticket to a machine on the domain.</li><li>Service
+ Principal Name (SPN) – A Service Principal Name is an identifier given 
+to a service instance to associate a service instance with a domain 
+service account. Windows requires that services have a domain service 
+account which is why a service needs an SPN set.</li><li>KDC Long Term 
+Secret Key (KDC LT Key)- The KDC key is based on the KRBTGT service 
+account. It is used to encrypt the TGT and sign the PAC.</li><li>Client 
+Long Term Secret Key (Client LT Key)- The client key is based on the 
+computer or service account. It is used to check the encrypted timestamp
+ and encrypt the session key.</li><li>Service Long Term Secret Key 
+(Service LT Key)- The service key is based on the service account. It is
+ used to encrypt the service portion of the service ticket and sign the 
+PAC.</li><li>Session Key – Issued by the KDC when a TGT is issued. The 
+user will provide the session key to the KDC along with the TGT when 
+requesting a service ticket.</li><li>Privilege Attribute Certificate 
+(PAC) – The PAC holds all of the user’s relevant information, it is sent
+ along with the TGT to the KDC to be signed by the Target LT Key and the
+ KDC LT Key in order to validate the user.</li></ul>
+
+
+
+<p>AS-REQ w/ Pre-Authentication In Detail –</p>
+
+
+
+<p>The AS-REQ step in Kerberos authentication starts when a user 
+requests a TGT from the KDC. In order to validate the user and create a 
+TGT for the user, the KDC must follow these exact steps. The first step 
+is for the user to encrypt a timestamp NT hash and send it to the AS. 
+The KDC attempts to decrypt the timestamp using the NT hash from the 
+user, if successful the KDC will issue a TGT as well as a session key 
+for the user.</p>
+
+
+
+<p>Ticket Granting Ticket Contents –</p>
+
+
+
+<p>In order to understand how the service tickets get created and 
+validated, we need to start with where the tickets come from; the TGT is
+ provided by the user to the KDC, in return, the KDC validates the TGT 
+and returns a service ticket.</p>
+
+
+
+<figure class="wp-block-image"><img src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/QFeXDN0.png" alt=""></figure>
+
+
+
+<p>Service Ticket Contents –</p>
+
+
+
+<p>To understand how Kerberos authentication works you first need to 
+understand what these tickets contain and how they’re validated. A 
+service ticket contains two portions: the service provided portion and 
+the user-provided portion. I’ll break it down into what each portion 
+contains.</p>
+
+
+
+<ul><li>Service Portion: User Details, Session Key, Encrypts the ticket with the service account NTLM hash.</li><li>User Portion: Validity Timestamp, Session Key, Encrypts with the TGT session key.</li></ul>
+
+
+
+<figure class="wp-block-image"><img src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/kUqrVBa.png" alt=""></figure>
+
+
+
+<p>Kerberos Authentication Overview –</p>
+
+
+
+<figure class="wp-block-image"><img src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/VRr2B6w.png" alt=""></figure>
+
+
+
+<p>AS-REQ – 1.) The client requests an Authentication Ticket or Ticket Granting Ticket (TGT).</p>
+
+
+
+<p>AS-REP – 2.) The Key Distribution Center verifies the client and sends back an encrypted TGT.</p>
+
+
+
+<p>TGS-REQ – 3.) The client sends the encrypted TGT to the Ticket 
+Granting Server (TGS) with the Service Principal Name (SPN) of the 
+service the client wants to access.</p>
+
+
+
+<p>TGS-REP – 4.) The Key Distribution Center (KDC) verifies the TGT of 
+the user and that the user has access to the service, then sends a valid
+ session key for the service to the client.</p>
+
+
+
+<p>AP-REQ –&nbsp;5.) The client requests the service and sends the valid session key to prove the user has access.</p>
+
+
+
+<p>AP-REP – 6.) The service grants access</p>
+
+
+
+<p>Kerberos Tickets Overview –</p>
+
+
+
+<p>The main ticket that you will see is a ticket-granting ticket these 
+can come in various forms such as a .kirbi for Rubeus .ccache for 
+Impacket. The main ticket that you will see is a .kirbi ticket. A ticket
+ is typically base64&nbsp;encoded and can be used for various attacks. 
+The ticket-granting ticket is only used with the KDC in order to get 
+service tickets. Once you give the TGT the server then gets the User 
+details, session key, and then encrypts the ticket with the service 
+account NTLM hash. Your TGT then gives the encrypted timestamp, session 
+key, and the encrypted TGT. The KDC will then authenticate the TGT and 
+give back a service ticket for the requested service. A normal TGT will 
+only work with that given service account that is connected to it 
+however a KRBTGT allows you to get any service ticket that you want 
+allowing you to access anything on the domain that you want.</p>
+
+
+
+<p>Attack Privilege Requirments –</p>
+
+
+
+<ul><li>Kerbrute Enumeration – No domain access required</li><li>Pass the Ticket – Access as a user to the domain required</li><li>Kerberoasting – Access as any user required</li><li>AS-REP Roasting – Access as any user required</li><li>Golden Ticket – Full domain compromise (domain admin) required</li><li>Silver Ticket – Service hash required</li><li>Skeleton Key – Full domain compromise (domain admin) required</li></ul>
+
+
+
+<p>To start this room deploy the machine and start the next section on enumeration w/ Kerbrute</p>
+
+
+
+<p>This Machine can take up to 10 minutes to boot</p>
+
+
+
+<p>and up to 5 minutes to SSH or RDP into the machine</p>
+
+
+
+<hr class="wp-block-separator">
+
+
+
+<figure class="wp-block-table"><table><tbody><tr><td>#1</td><td>What does TGT stand for?</td></tr></tbody></table></figure>
+
+
+
+<figure class="wp-block-table"><table><tbody><tr><td>#2</td><td>What does SPN stand for?</td></tr></tbody></table></figure>
+
+
+
+<figure class="wp-block-table"><table><tbody><tr><td>#3</td><td>What does PAC stand for?</td></tr></tbody></table></figure>
+
+
+
+<figure class="wp-block-table"><table><tbody><tr><td>#4</td><td>What two services make up the KDC?</td></tr></tbody></table></figure>
+
+
+
+<figure class="wp-block-table"><table><tbody><tr><td>#5</td><td>Deploy the Machine</td></tr></tbody></table></figure>
+
+
+
+<p><a>[Task 2]&nbsp;Enumeration w/ Kerbrute</a></p>
+
+
+
+<p>Kerbrute is a popular enumeration tool used to brute-force and 
+enumerate valid active-directory users by abusing the Kerberos 
+pre-authentication.</p>
+
+
+
+<p>For more information on enumeration using Kerbrute check out the Attacktive Directory room by Sq00ky –&nbsp;<a href="https://tryhackme.com/room/attacktivedirectory">https://tryhackme.com/room/attacktivedirectory</a></p>
+
+
+
+<p>You need to add the DNS domain name along with the machine IP&nbsp;to
+ /etc/hosts inside of your attacker machine or these attacks will not 
+work for you –&nbsp;<code>MACHINE_IP&nbsp; CONTROLLER.local</code></p>
+
+
+
+<p>Abusing Pre-Authentication Overview –</p>
+
+
+
+<p>By brute-forcing Kerberos pre-authentication, you do not trigger the 
+account failed to log on event which can throw up red flags to blue 
+teams. When brute-forcing through Kerberos you can brute-force by only 
+sending a single UDP frame to the KDC allowing you to enumerate the 
+users on the domain from a wordlist.</p>
+
+
+
+<figure class="wp-block-image"><img src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/2IomUnH.jpg" alt=""></figure>
+
+
+
+<p>Kerbrute Installation –</p>
+
+
+
+<p>1.) Download a precompiled binary for your OS –&nbsp;<a href="https://github.com/ropnop/kerbrute/releases">https://github.com/ropnop/kerbrute/releases</a></p>
+
+
+
+<p>2.) Rename kerbrute_linux_amd64&nbsp;to kerbrute</p>
+
+
+
+<p>3.)&nbsp;<code>chmod +x kerbrute</code>&nbsp;– make kerbrute executable</p>
+
+
+
+<p>Enumerating Users w/ Kerbrute –</p>
+
+
+
+<p>Enumerating users allows you to know which user accounts are on the 
+target domain and which accounts could potentially be used to access the
+ network.</p>
+
+
+
+<p>1.) cd into the directory that you put Kerbrute</p>
+
+
+
+<p>2.) Download the wordlist to enumerate with&nbsp;<a href="https://github.com/Cryilllic/Active-Directory-Wordlists/blob/master/User.txt" target="_blank" rel="noreferrer noopener">here</a></p>
+
+
+
+<p>3.)&nbsp;<code>./kerbrute userenum --dc CONTROLLER.local -d CONTROLLER.local User.txt</code>&nbsp;– This will brute force user accounts from a domain controller using a supplied wordlist</p>
+
+
+
+<figure class="wp-block-image"><img src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/fSDrhyb.png" alt=""></figure>
+
+
+
+<p>Now enumerate on your own and find the rest of the users and more importantly service accounts.</p>
+
+
+
+<hr class="wp-block-separator">
+
+
+
+<figure class="wp-block-table"><table><tbody><tr><td>#1</td><td>How many total users do we enumerate?</td></tr></tbody></table></figure>
+
+
+
+<figure class="wp-block-table"><table><tbody><tr><td>#2</td><td>What is the SQL service account name?</td></tr></tbody></table></figure>
+
+
+
+<figure class="wp-block-table"><table><tbody><tr><td>#3</td><td>What is the second “machine” account name?</td></tr></tbody></table></figure>
+
+
+
+<figure class="wp-block-table"><table><tbody><tr><td>#4</td><td>What is the third “user” account name?</td></tr></tbody></table></figure>
+
+
+
+<p><a>[Task 3]&nbsp;Harvesting &amp; Brute-Forcing Tickets w/ Rubeus</a></p>
+
+
+
+<p>To start this task you will need to RDP or SSH into the machine your 
+credentials are – Username: Administrator Password: P@$$W0rd Domain: 
+controller.local</p>
+
+
+
+<p>Your Machine IP is&nbsp;<code>MACHINE_IP</code></p>
+
+
+
+<p>Rubeus is a powerful tool for attacking Kerberos. Rubeus is an 
+adaptation of the kekeo tool and developed by HarmJ0y the very well 
+known active directory guru.</p>
+
+
+
+<p>Rubeus has a wide variety of attacks and features that allow it to be
+ a very versatile tool for attacking Kerberos. Just some of the many 
+tools and attacks include overpass the hash, ticket requests and 
+renewals, ticket management, ticket extraction, harvesting, pass the 
+ticket, AS-REP Roasting, and Kerberoasting.</p>
+
+
+
+<p>The tool has way too many attacks and features for me to cover all of
+ them so I’ll be covering only the ones I think are most crucial to 
+understand how to attack Kerberos however I encourage you to research 
+and learn more about Rubeus and its whole host of attacks and features 
+here –&nbsp;<a href="https://github.com/GhostPack/Rubeus">https://github.com/GhostPack/Rubeus</a></p>
+
+
+
+<p>Rubeus is already compiled and on the target machine.</p>
+
+
+
+<figure class="wp-block-image"><img src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/2KTvdDp.png" alt=""></figure>
+
+
+
+<p>Harvesting Tickets w/ Rubeus –</p>
+
+
+
+<p>Harvesting gathers tickets that are being transferred to the KDC and 
+saves them for use in other attacks such as the pass the ticket attack.</p>
+
+
+
+<p>1.)&nbsp;<code>cd Downloads</code>&nbsp;– navigate to the directory Rubeus is in</p>
+
+
+
+<p>2.)&nbsp;<code>Rubeus.exe harvest /interval:30</code>&nbsp;– This command tells Rubeus to harvest for TGTs every 30 seconds</p>
+
+
+
+<figure class="wp-block-image"><img src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/VCeyyn9.png" alt=""></figure>
+
+
+
+<p>Brute-Forcing / Password-Spraying w/ Rubeus –</p>
+
+
+
+<p>Rubeus can both brute force passwords as well as password spray user 
+accounts. When brute-forcing passwords you use a single user account and
+ a wordlist of passwords to see which password works for that given user
+ account. In password spraying, you give a single password such as 
+Password1 and “spray” against all found user accounts in the domain to 
+find which one may have that password.</p>
+
+
+
+<p>This attack will take a given Kerberos-based password and spray it 
+against all found users and give a .kirbi ticket. This ticket is a TGT 
+that can be used in order to get service tickets from the KDC as well as
+ to be used in attacks like the pass the ticket attack.</p>
+
+
+
+<p>Due to the way IP addresses are handled in Rubeus this attack is not 
+possible on the THM VM however, I encourage you to configure this on 
+your own network.</p>
+
+
+
+<p>1.)&nbsp;<code>cd Downloads</code>&nbsp;– navigate to the directory Rubeus is in</p>
+
+
+
+<p>2.)&nbsp;<code>Rubeus.exe brute /password:Password1 /noticket</code>&nbsp;– This will take a given password and “spray” it against all found users then give the .kirbi TGT for that user</p>
+
+
+
+<figure class="wp-block-image"><img src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/WN4zVo5.png" alt=""></figure>
+
+
+
+<p>Be mindful of how you use this attack as it may lock you out of the network depending on the account lockout policies.</p>
+
+
+
+<hr class="wp-block-separator">
+
+
+
+<figure class="wp-block-table"><table><tbody><tr><td>#1</td><td>Which domain admin do we get a ticket for when harvesting tickets?</td></tr></tbody></table></figure>
+
+
+
+<figure class="wp-block-table"><table><tbody><tr><td>#2</td><td>Which domain controller do we get a ticket for when harvesting tickets?</td></tr></tbody></table></figure>
+
+
+
+<p><a>[Task 4]&nbsp;Kerberoasting w/ Rubeus &amp; Impacket</a></p>
+
+
+
+<p>In this task we’ll be covering one of the most popular Kerberos 
+attacks – Kerberoasting. Kerberoasting allows a user to request a 
+service ticket for any service with a registered SPN then use that 
+ticket to crack the service password. If the service has a registered 
+SPN then it can be Kerberoastable however the success of the attack 
+depends on how strong the password is and if it is trackable as well as 
+the privileges of the cracked service account. To enumerate 
+Kerberoastable accounts I would suggest a tool like BloodHound to find 
+all Kerberoastable accounts, it will allow you to see what kind of 
+accounts you can kerberoast if they are domain admins, and what kind of 
+connections they have to the rest of the domain. That is a bit out of 
+scope for this room but it is a great tool for finding accounts to 
+target.</p>
+
+
+
+<p>In order to perform the attack, we’ll be using both Rubeus as well as
+ Impacket so you understand the various tools out there for 
+Kerberoasting. There are other tools out there such a kekeo and 
+Invoke-Kerberoast but I’ll leave you to do your own research on those 
+tools.</p>
+
+
+
+<p>I have already taken the time to put Rubeus on the machine for you, it is located in the downloads folder.</p>
+
+
+
+<figure class="wp-block-image"><img src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/Mtl9O6B.png" alt=""></figure>
+
+
+
+<p>Method 1 – Rubeus</p>
+
+
+
+<p>Kerberoasting w/ Rubeus –</p>
+
+
+
+<p>1.)&nbsp;<code>cd Downloads</code>&nbsp;– navigate to the directory Rubeus is in</p>
+
+
+
+<p>2.)&nbsp;<code>Rubeus.exe kerberoast</code>&nbsp;This will dump the Kerberos hash of any kerberoastable users</p>
+
+
+
+<figure class="wp-block-image"><img src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/XZegVqf.png" alt=""></figure>
+
+
+
+<p>copy the hash onto your attacker machine and put it into a .txt file so we can crack it with hashcat</p>
+
+
+
+<p>I have created a modified rockyou wordlist in order to speed up the process download it&nbsp;<a href="https://github.com/Cryilllic/Active-Directory-Wordlists/blob/master/Pass.txt" target="_blank" rel="noreferrer noopener">here</a></p>
+
+
+
+<p>3.)&nbsp;<code>hashcat -m 13100 -a 0 hash.txt Pass.txt</code>&nbsp;– now crack that hash</p>
+
+
+
+<p>Method 2 – Impacket</p>
+
+
+
+<p>Impacket Installation –</p>
+
+
+
+<p>Impacket releases have been unstable since 0.9.20 I suggest getting an installation of Impacket &lt; 0.9.20</p>
+
+
+
+<p>1.)&nbsp;<code>cd /opt</code>&nbsp;navigate to your preferred directory to save tools in</p>
+
+
+
+<p>2.) download the precompiled package from&nbsp;<a href="https://github.com/SecureAuthCorp/impacket/releases/tag/impacket_0_9_19">https://github.com/SecureAuthCorp/impacket/releases/tag/impacket_0_9_19</a></p>
+
+
+
+<p>3.)&nbsp;<code>cd Impacket-0.9.19</code>&nbsp;navigate to the impacket directory</p>
+
+
+
+<p>4.)&nbsp;<code>pip install .</code>&nbsp;– this will install all needed dependencies</p>
+
+
+
+<p>Kerberoasting w/ Impacket –</p>
+
+
+
+<p>1.)&nbsp;<code>cd /usr/share/doc/python3-impacket/examples/</code>&nbsp;– navigate to where GetUserSPNs.py is located</p>
+
+
+
+<p>2.)&nbsp;<code>sudo python3 GetUserSPNs.py controller.local/Machine1:Password1 -dc-ip MACHINE_IP -request</code>&nbsp;–
+ this will dump the Kerberos hash for all kerberoastable accounts it can
+ find on the target domain just like Rubeus does; however, this does not
+ have to be on the targets machine and can be done remotely.</p>
+
+
+
+<p>3.)&nbsp;<code>hashcat -m 13100 -a 0 hash.txt Pass.txt</code>&nbsp;– now crack that hash</p>
+
+
+
+<p>What Can a Service Account do?</p>
+
+
+
+<p>After cracking the service account password there are various ways of
+ exfiltrating data or collecting loot depending on whether the service 
+account is a domain admin or not. If the service account is a domain 
+admin you have control similar to that of a golden/silver ticket and can
+ now gather loot such as dumping the NTDS.dit. If the service account is
+ not a domain admin you can use it to log into other systems and pivot 
+or escalate or you can use that cracked password to spray against other 
+service and domain admin accounts; many companies may reuse the same or 
+similar passwords for their service or domain admin users. If you are in
+ a professional pen test be aware of how the company wants you to show 
+risk most of the time they don’t want you to exfiltrate data and will 
+set a goal or process for you to get in order to show risk inside of the
+ assessment. For more information on exfiltrating data and looting 
+windows check out sq00ky’s room: Looting Windows –&nbsp;<a href="https://tryhackme.com/room/lootingwindows">https://tryhackme.com/room/lootingwindows</a></p>
+
+
+
+<p>Mitigation – Defending the Forest</p>
+
+
+
+<figure class="wp-block-image"><img src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/YPuNS2X.png" alt=""></figure>
+
+
+
+<p>Kerberoasting Mitigation –</p>
+
+
+
+<ul><li>&nbsp;Strong Service Passwords – If the service account passwords are strong then kerberoasting will be ineffective</li><li>&nbsp;Don’t
+ Make Service Accounts Domain Admins – Service accounts don’t need to be
+ domain admins, kerberoasting won’t be as effective if you don’t make 
+service accounts domain admins.</li></ul>
+
+
+
+<hr class="wp-block-separator">
+
+
+
+<figure class="wp-block-table"><table><tbody><tr><td>#1</td><td>What is the HTTPService Password?</td></tr></tbody></table></figure>
+
+
+
+<figure class="wp-block-table"><table><tbody><tr><td>#2</td><td>What is the SQLService Password?</td></tr></tbody></table></figure>
+
+
+
+<p><a>[Task 5]&nbsp;AS-REP Roasting w/ Rubeus</a></p>
+
+
+
+<p>Very similar to Kerberoasting, AS-REP Roasting dumps the krbasrep5 
+hashes of user accounts that have Kerberos pre-authentication disabled. 
+Unlike Kerberoasting these users do not have to be service accounts the 
+only requirement to be able to AS-REP roast a user is the user must have
+ pre-authentication disabled.</p>
+
+
+
+<p>We’ll continue using Rubeus same as we have with kerberoasting and 
+harvesting since Rubeus has a very simple and easy to understand command
+ to AS-REP roast and attack users with Kerberos pre-authentication 
+disabled. After dumping the hash from Rubeus we’ll use hashcat in order 
+to crack the krbasrep5 hash.</p>
+
+
+
+<p>There are other tools out as well for AS-REP Roasting such as kekeo 
+and Impacket’s GetNPUsers.py. Rubeus is easier to use because it 
+automatically finds AS-REP Roastable users whereas with GetNPUsers you 
+have to enumerate the users beforehand and know which users may be 
+AS-REP Roastable.</p>
+
+
+
+<p>I have already compiled and put Rubeus on the machine.</p>
+
+
+
+<p>AS-REP Roasting Overview –</p>
+
+
+
+<p>During pre-authentication, the users hash will be used to encrypt a 
+timestamp that the domain controller will attempt to decrypt to validate
+ that the right hash is being used and is not replaying a previous 
+request. After validating the timestamp the KDC will then issue a TGT 
+for the user. If pre-authentication is disabled you can request any 
+authentication data for any user and the KDC will return an encrypted 
+TGT that can be cracked offline because the KDC skips the step of 
+validating that the user is really who they say that they are.</p>
+
+
+
+<figure class="wp-block-image"><img src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/arAImcA.png" alt=""></figure>
+
+
+
+<p>Dumping KRBASREP5 Hashes w/ Rubeus –</p>
+
+
+
+<p>1.)&nbsp;<code>cd Downloads</code>&nbsp;– navigate to the directory Rubeus is in</p>
+
+
+
+<p>2.)&nbsp;<code>Rubeus.exe asreproast</code>&nbsp;– This will run the AS-REP roast command looking for vulnerable users and then dump found vulnerable user hashes.</p>
+
+
+
+<figure class="wp-block-image"><img src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/l3wJhby.png" alt=""></figure>
+
+
+
+<p>Crack those Hashes w/ hashcat –</p>
+
+
+
+<p>1.) Transfer the hash from the target machine over to your attacker machine and put the hash into a txt file</p>
+
+
+
+<p>2.) Insert 23$ after $krb5asrep$ so that the first line will be $krb5asrep$23$User…..</p>
+
+
+
+<p>Use the same wordlist that you downloaded in task 4</p>
+
+
+
+<p>3.)&nbsp;<code>hashcat -m 18200 hash.txt Pass.txt</code>&nbsp;– crack those hashes! Rubeus AS-REP Roasting uses hashcat mode 18200</p>
+
+
+
+<figure class="wp-block-image"><img src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/eOqGVrm.png" alt=""></figure>
+
+
+
+<p>AS-REP Roasting Mitigations –</p>
+
+
+
+<ul><li>Have a strong password policy. With a strong password, the hashes will take longer to crack making this attack less effective</li><li>Don’t
+ turn off Kerberos Pre-Authentication unless it’s necessary there’s 
+almost no other way to completely mitigate this attack other than 
+keeping Pre-Authentication on.</li></ul>
+
+
+
+<hr class="wp-block-separator">
+
+
+
+<figure class="wp-block-table"><table><tbody><tr><td>#1</td><td>What hash type does AS-REP Roasting use?</td></tr></tbody></table></figure>
+
+
+
+<figure class="wp-block-table"><table><tbody><tr><td>#2</td><td>Which User is vulnerable to AS-REP Roasting?</td></tr></tbody></table></figure>
+
+
+
+<figure class="wp-block-table"><table><tbody><tr><td>#3</td><td>What is the User’s Password?</td></tr></tbody></table></figure>
+
+
+
+<figure class="wp-block-table"><table><tbody><tr><td>#4</td><td>Which Admin is vulnerable to AS-REP Roasting?</td></tr></tbody></table></figure>
+
+
+
+<figure class="wp-block-table"><table><tbody><tr><td>#5</td><td>What is the Admin’s Password?</td></tr></tbody></table></figure>
+
+
+
+<p><a>[Task 6]&nbsp;Pass the Ticket w/ mimikatz</a></p>
+
+
+
+<p>Mimikatz is a very popular and powerful post-exploitation tool most 
+commonly used for dumping user credentials inside of an active directory
+ network however well be using mimikatz in order to create a silver 
+ticket.</p>
+
+
+
+<p>A silver ticket can sometimes be better used in engagements rather 
+than a golden ticket because it is a little more discreet. If stealth 
+and staying undetected matter then a silver ticket is probably a better 
+option than a golden ticket however the approach to creating one is the 
+exact same. The key difference between the two tickets is that a silver 
+ticket is limited to the service that is targeted whereas a golden 
+ticket has access to any Kerberos service.</p>
+
+
+
+<p>A specific use scenario for a silver ticket would be that you want to
+ access the domain’s SQL server however your current compromised user 
+does not have access to that server. You can find an accessible service 
+account to get a foothold with by kerberoasting that service, you can 
+then dump the service hash and then impersonate their TGT in order to 
+request a service ticket for the SQL service from the KDC allowing you 
+access to the domain’s SQL server.</p>
+
+
+
+<p>KRBTGT Overview</p>
+
+
+
+<p>In order to fully understand how these attacks work you need to 
+understand what the difference between a KRBTGT and a TGT is. A KRBTGT 
+is the service account for the KDC this is the Key Distribution Center 
+that issues all of the tickets to the clients. If you impersonate this 
+account and create a golden ticket form the KRBTGT you give yourself the
+ ability to create a service ticket for anything you want. A TGT is a 
+ticket to a service account issued by the KDC and can only access that 
+service the TGT is from like the SQLService ticket.</p>
+
+
+
+<p>Golden/Silver Ticket Attack Overview –</p>
+
+
+
+<p>A golden ticket attack works by dumping the ticket-granting ticket of
+ any user on the domain this would preferably be a domain admin however 
+for a golden ticket you would dump the krbtgt ticket and for a silver 
+ticket, you would dump any service or domain admin ticket. This will 
+provide you with the service/domain admin account’s SID or security 
+identifier that is a unique identifier for each user account, as well as
+ the NTLM hash. You then use these details inside of a mimikatz golden 
+ticket attack in order to create a TGT that impersonates the given 
+service account information.</p>
+
+
+
+<figure class="wp-block-image"><img src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/GT1kkfo.png" alt=""></figure>
+
+
+
+<p>Dump the krbtgt hash –</p>
+
+
+
+<p>1.)&nbsp;<code>cd downloads &amp;&amp; mimikatz.exe</code>&nbsp;– navigate to the directory mimikatz is in and run mimikatz</p>
+
+
+
+<p>2.)&nbsp;<code>privilege::debug</code>&nbsp;– ensure this outputs [privilege ’20’ ok]</p>
+
+
+
+<p>3.)&nbsp;<code>lsadump::lsa /inject /name:krbtgt</code>&nbsp;– This 
+will dump the hash as well as the security identifier needed to create a
+ Golden Ticket. To create a silver ticket you need to change the /name: 
+to dump the hash of either a domain admin account or a service account 
+such as the SQLService account.</p>
+
+
+
+<figure class="wp-block-image"><img src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/VOEsU4O.png" alt=""></figure>
+
+
+
+<p>Create a Golden/Silver Ticket –</p>
+
+
+
+<p>1.)&nbsp;<code>Kerberos::golden /user:Administrator /domain:controller.local /sid: /krbtgt: /id:</code>&nbsp;–
+ This is the command for creating a golden ticket to create a silver 
+ticket simply put a service NTLM hash into the krbtgt slot, the sid of 
+the service account into sid, and change the id to 1103.</p>
+
+
+
+<p>I’ll show you a demo of creating a golden ticket it is up to you to create a silver ticket.</p>
+
+
+
+<figure class="wp-block-image"><img src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/rh06qDl.png" alt=""></figure>
+
+
+
+<p>Use the Golden/Silver Ticket to access other machines –</p>
+
+
+
+<p>1.)&nbsp;<code>misc::cmd</code>&nbsp;– this will open a new elevated command prompt with the given ticket in mimikatz.</p>
+
+
+
+<figure class="wp-block-image"><img src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/6HnEnwi.png" alt=""></figure>
+
+
+
+<p>2.) Access machines that you want, what you can access will depend on
+ the privileges of the user that you decided to take the ticket from 
+however if you took the ticket from krbtgt you have access to the ENTIRE
+ network hence the name golden ticket; however, silver tickets only have
+ access to those that the user has access to if it is a domain admin it 
+can almost access the entire network however it is slightly less 
+elevated from a golden ticket.</p>
+
+
+
+<figure class="wp-block-image"><img src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/BSh4rXy.png" alt=""></figure>
+
+
+
+<p>This attack will not work without other machines on the domain 
+however I challenge you to configure this on your own network and try 
+out these attacks.</p>
+
+
+
+<hr class="wp-block-separator">
+
+
+
+<figure class="wp-block-table"><table><tbody><tr><td>#1</td><td>What is the SQLService NTLM Hash?</td></tr></tbody></table></figure>
+
+
+
+<figure class="wp-block-table"><table><tbody><tr><td>#2</td><td>What is the Administrator NTLM Hash?</td></tr></tbody></table></figure>
+
+
+
+<p><a>[Task 8]&nbsp;Kerberos Backdoors w/ mimikatz</a></p>
+
+
+
+<p>Along with maintaining access using golden and silver tickets 
+mimikatz has one other trick up its sleeves when it comes to attacking 
+Kerberos. Unlike the golden and silver ticket attacks a Kerberos 
+backdoor is much more subtle because it acts similar to a rootkit by 
+implanting itself into the memory of the domain forest allowing itself 
+access to any of the machines with a master password.</p>
+
+
+
+<p>The Kerberos backdoor works by implanting a skeleton key that abuses 
+the way that the AS-REQ validates encrypted timestamps. A skeleton key 
+only works using Kerberos RC4 encryption.</p>
+
+
+
+<p>The default hash for a mimikatz skeleton key is&nbsp;<em>60BA4FCADC466C7A033C178194C03DF6</em>&nbsp;which makes the password -“<em>mimikatz</em>”</p>
+
+
+
+<p>This will only be an overview section and will not require you to do 
+anything on the machine however I encourage you to continue yourself and
+ add other machines and test using skeleton keys with mimikatz.</p>
+
+
+
+<p>Skeleton Key Overview –</p>
+
+
+
+<p>The skeleton key works by abusing the AS-REQ encrypted timestamps as I
+ said above, the timestamp is encrypted with the users NT hash. The 
+domain controller then tries to decrypt this timestamp with the users NT
+ hash, once a skeleton key is implanted the domain controller tries to 
+decrypt the timestamp using both the user NT hash and the&nbsp;skeleton 
+key NT hash allowing you access to the domain forest.</p>
+
+
+
+<figure class="wp-block-image"><img src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/yNI0zEb.png" alt=""></figure>
+
+
+
+<p>Preparing Mimikatz –</p>
+
+
+
+<p>1.)&nbsp;<code>cd Downloads &amp;&amp; mimikatz.exe</code>&nbsp;– Navigate to the directory mimikatz is in and run mimikatz</p>
+
+
+
+<p>2.)&nbsp;<code>privilege::debug</code>&nbsp;– This should be a standard for running mimikatz as mimikatz needs local administrator access</p>
+
+
+
+<figure class="wp-block-image"><img src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/ZPOMDMo.png" alt=""></figure>
+
+
+
+<p>Installing the Skeleton Key w/ mimikatz –</p>
+
+
+
+<p>1.)&nbsp;<code>misc::skeleton</code>&nbsp;– Yes! that’s it but don’t underestimate this small command it is very powerful</p>
+
+
+
+<figure class="wp-block-image"><img src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/wI802gw.png" alt=""></figure>
+
+
+
+<p>Accessing the forest –</p>
+
+
+
+<p>The default credentials will be: “<em>mimikatz</em>”</p>
+
+
+
+<p>example:&nbsp;<code>net use c:\\DOMAIN-CONTROLLER\admin$&nbsp;/user:Administrator mimikatz</code>&nbsp;– The share will now be accessible without the need for the Administrators password</p>
+
+
+
+<p>example:&nbsp;<code>dir \\Desktop-1\c$ /user:Machine1 mimikatz</code>&nbsp;– access the directory of Desktop-1 without ever knowing what users have access to Desktop-1</p>
+
+
+
+<p>The skeleton key will not persist by itself because it runs in the 
+memory, it can be scripted or persisted using other tools and techniques
+ however that is out of scope for this room.</p>
+
+
+
+<hr class="wp-block-separator">
+
+
+
+<figure class="wp-block-table"><table><tbody><tr><td>#1</td><td>I understand how to implant a skeleton key into a domain controller with mimikatz</td></tr></tbody></table></figure>
+
+
+
+<p><a>[Task 9]&nbsp;Conclusion</a></p>
+
+
+
+<p>We’ve gone through everything from the initial enumeration of 
+Kerberos, dumping tickets, pass the ticket attacks, kerberoasting, 
+AS-REP roasting, implanting skeleton keys, and golden/silver tickets. I 
+encourage you to go out and do some more research on these different 
+types of attacks and really find what makes them tick and find the 
+multitude of different tools and frameworks out there designed for 
+attacking Kerberos as well as active directory as a whole.</p>
+
+
+
+<p>You should now have the basic knowledge to go into an engagement and 
+be able to use Kerberos as an attack vector for both exploitations as 
+well as privilege escalation.</p>
+
+
+
+<p>Know that you have the knowledge needed to attack Kerberos I 
+encourage you to configure your own active directory lab on your network
+ and try out these attacks on your own to really get an understanding of
+ how these attacks work.</p>
+
+
+
+<p>Resources –</p>
+
+
+
+<ul><li><a href="https://medium.com/@t0pazg3m/pass-the-ticket-ptt-attack-in-mimikatz-and-a-gotcha-96a5805e257a">https://medium.com/@t0pazg3m/pass-the-ticket-ptt-attack-in-mimikatz-and-a-gotcha-96a5805e257a</a></li><li><a href="https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat">https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat</a></li><li><a href="https://posts.specterops.io/kerberoasting-revisited-d434351bd4d1">https://posts.specterops.io/kerberoasting-revisited-d434351bd4d1</a></li><li><a href="https://www.harmj0y.net/blog/redteaming/not-a-security-boundary-breaking-forest-trusts/">https://www.harmj0y.net/blog/redteaming/not-a-security-boundary-breaking-forest-trusts/</a></li><li><a href="https://www.varonis.com/blog/kerberos-authentication-explained/">https://www.varonis.com/blog/kerberos-authentication-explained/</a></li><li><a href="https://www.blackhat.com/docs/us-14/materials/us-14-Duckwall-Abusing-Microsoft-Kerberos-Sorry-You-Guys-Don't-Get-It-wp.pdf">https://www.blackhat.com/docs/us-14/materials/us-14-Duckwall-Abusing-Microsoft-Kerberos-Sorry-You-Guys-Don’t-Get-It-wp.pdf</a></li><li><a href="https://www.sans.org/cyber-security-summit/archives/file/summit-archive-1493862736.pdf">https://www.sans.org/cyber-security-summit/archives/file/summit-archive-1493862736.pdf</a></li><li><a href="https://www.redsiege.com/wp-content/uploads/2020/04/20200430-kerb101.pdf">https://www.redsiege.com/wp-content/uploads/2020/04/20200430-kerb101.pdf</a></li></ul>
+
+
+
+<hr class="wp-block-separator">
+
+
+
+<figure class="wp-block-table"><table><tbody><tr><td>#1</td><td>I Understand the Basics of Attacking Kerberos</td></tr></tbody></table></figure>
+
+
+
+<p>137 users are in here This room is 3 days old <img loading="lazy" src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/9e946af210ae86d6fbfda480d958b3fe.gif" width="94" height="118">&nbsp;Created by&nbsp;Cryillic</p>
+
+
+
+<p>Only subscribers can deploy virtual machines in this room! Go to your&nbsp;<a href="https://tryhackme.com/profile">profile</a>&nbsp;page to subscribe (if you have not already).</p>
+
+
+
+<p>other references used : <a href="https://codebeautify.org/ntlm-hash-generator">https://codebeautify.org/ntlm-hash-generator</a></p>
+
+
+
+<blockquote class="wp-block-quote"><p>Author</p><p>Puckiestyle</p></blockquote>
+						
+						<div class="clear"></div>
+									        
+					</div><!-- .post-content -->
+					            					
+					<div class="post-meta-container">
+						
+						<div class="post-author">
+						
+							<div class="post-author-content">
+							
+								<h4>mystiko_admin</h4>
+								
+																
+								<div class="author-links">
+									
+									<a class="author-link-posts" href="https://mystiko.sh/?author=1">Author archive</a>
+									
+																		
+								</div><!-- .author-links -->
+							
+							</div><!-- .post-author-content -->
+						
+						</div><!-- .post-author -->
+						
+						<div class="post-meta">
+						
+							<p class="post-date">June 29, 2020</p>
+							
+														
+							<p class="post-categories"><a href="https://mystiko.sh/?cat=1" rel="category">Uncategorized</a></p>
+							
+														
+							<div class="clear"></div>
+							
+							<div class="post-nav">
+							
+																
+									<a class="post-nav-prev" href="https://mystiko.sh/?p=699">Previous post</a>
+							
+																		
+									<a class="post-nav-next" href="https://mystiko.sh/?p=716">Next post</a>
+							
+																		
+								<div class="clear"></div>
+							
+							</div><!-- .post-nav -->
+						
+						</div><!-- .post-meta -->
+						
+						<div class="clear"></div>
+							
+					</div><!-- .post-meta-container -->
+																		
+					
+
+	<div id="respond" class="comment-respond">
+		<h3 id="reply-title" class="comment-reply-title">Leave a Reply <small><a rel="nofollow" id="cancel-comment-reply-link" href="https://mystiko.sh/?p=714#respond" style="display:none;">Cancel reply</a></small></h3><form action="https://mystiko.sh/wp-comments-post.php" method="post" id="commentform" class="comment-form"><p class="comment-notes"><span id="email-notes">Your email address will not be published.</span> Required fields are marked <span class="required">*</span></p><p class="comment-form-comment"><label for="comment">Comment</label> <textarea id="comment" name="comment" cols="45" rows="8" maxlength="65525" required="required"></textarea></p><p class="comment-form-author"><label for="author">Name <span class="required">*</span></label> <input id="author" name="author" type="text" size="30" maxlength="245" required="required"></p>
+<p class="comment-form-email"><label for="email">Email <span class="required">*</span></label> <input id="email" name="email" type="text" size="30" maxlength="100" aria-describedby="email-notes" required="required"></p>
+<p class="comment-form-url"><label for="url">Website</label> <input id="url" name="url" type="text" size="30" maxlength="200"></p>
+<p class="comment-form-cookies-consent"><input id="wp-comment-cookies-consent" name="wp-comment-cookies-consent" type="checkbox" value="yes"> <label for="wp-comment-cookies-consent">Save my name, email, and website in this browser for the next time I comment.</label></p>
+<p class="form-submit"><input name="submit" type="submit" id="submit" class="submit" value="Post Comment"> <input type="hidden" name="comment_post_ID" value="714" id="comment_post_ID">
+<input type="hidden" name="comment_parent" id="comment_parent" value="0">
+</p></form>	</div><!-- #respond -->
+													                        
+						
+			</div><!-- .post -->
+		
+		</div><!-- .content -->
+		
+		
+	<div class="sidebar fright" role="complementary">
+	
+		<div class="widget widget_search"><div class="widget-content"><form role="search" method="get" class="searchform" action="https://mystiko.sh/">
+	<label for="search-form-5f5b4c82ae06f">
+		<span class="screen-reader-text">Search for:</span>
+		<input type="search" id="search-form-5f5b4c82ae06f" class="search-field" placeholder="Search form" name="s">
+	</label>
+	<input type="submit" class="searchsubmit" value="Search">
+</form>
+</div><div class="clear"></div></div>
+		<div class="widget widget_recent_entries"><div class="widget-content">
+		<h3 class="widget-title">Recent Posts</h3>
+		<ul>
+											<li>
+					<a href="https://mystiko.sh/?p=772">Hackthebox – Remote</a>
+									</li>
+											<li>
+					<a href="https://mystiko.sh/?p=755">Weak</a>
+									</li>
+											<li>
+					<a href="https://mystiko.sh/?p=742">CMS</a>
+									</li>
+											<li>
+					<a href="https://mystiko.sh/?p=727">Shares</a>
+									</li>
+											<li>
+					<a href="https://mystiko.sh/?p=716">Engine</a>
+									</li>
+					</ul>
+
+		</div><div class="clear"></div></div><div class="widget widget_recent_comments"><div class="widget-content"><h3 class="widget-title">Recent Comments</h3><ul id="recentcomments"><li class="recentcomments"><span class="comment-author-link"><a href="https://www.xn--42c9bsq2d4fsbu.com/" rel="external nofollow ugc" class="url">ปั๊มไลค์</a></span> on <a href="https://mystiko.sh/?p=461#comment-857">Player</a></li><li class="recentcomments"><span class="comment-author-link"><a href="http://hzfukw.com/home.php?mod=space&amp;uid=13811&amp;do=profile&amp;from=space" rel="external nofollow ugc" class="url">water damage restoration company</a></span> on <a href="https://mystiko.sh/?p=458#comment-853">Bitlab</a></li><li class="recentcomments"><span class="comment-author-link"><a href="http://www.weiwucheng.com/home.php?mod=space&amp;uid=36162&amp;do=profile" rel="external nofollow ugc" class="url">smoke damage cleanup</a></span> on <a href="https://mystiko.sh/?p=458#comment-840">Bitlab</a></li><li class="recentcomments"><span class="comment-author-link"><a href="http://thhwz.com/home.php?mod=space&amp;uid=19799&amp;do=profile&amp;from=space" rel="external nofollow ugc" class="url">cars for kids donation</a></span> on <a href="https://mystiko.sh/?p=458#comment-809">Bitlab</a></li><li class="recentcomments"><span class="comment-author-link"><a href="http://www.bsss.info/space-uid-589711.html" rel="external nofollow ugc" class="url">Ho3 Policy</a></span> on <a href="https://mystiko.sh/?p=458#comment-808">Bitlab</a></li></ul></div><div class="clear"></div></div>		
+	</div><!-- .sidebar -->
+
+		
+		<div class="clear"></div>
+		
+	</div><!-- .section-inner -->
+
+</div><!-- .wrapper -->
+		
+
+	<div class="footer section medium-padding bg-graphite">
+	
+		<div class="section-inner row">
+		
+						
+				<div class="column column-1 one-third">
+				
+					<div class="widgets">
+			
+						<div class="widget widget_rss"><div class="widget-content"><h3 class="widget-title"><a class="rsswidget" href="https://ctftime.org/event/list/upcoming"><img class="rss-widget-icon" style="border:0" src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/rss.png" alt="RSS" width="14" height="14"></a> <a class="rsswidget" href="https://ctftime.org/event/list/upcoming/rss/">CTF events</a></h3><ul><li><a class="rsswidget" href="https://ctftime.org/event/1079">CSAW CTF Qualification Round 2020</a></li><li><a class="rsswidget" href="https://ctftime.org/event/1106">MetaCTF CyberGames 2020</a></li><li><a class="rsswidget" href="https://ctftime.org/event/1127">ISITDTU CTF 2020 Quals</a></li><li><a class="rsswidget" href="https://ctftime.org/event/1119">SECCON 2020 Online CTF</a></li><li><a class="rsswidget" href="https://ctftime.org/event/1108">Hacktober CTF</a></li><li><a class="rsswidget" href="https://ctftime.org/event/1099">N1CTF 2020</a></li><li><a class="rsswidget" href="https://ctftime.org/event/1053">mHackeCTF - Enterprise Edition</a></li><li><a class="rsswidget" href="https://ctftime.org/event/1017">Hack The Vote 2020</a></li><li><a class="rsswidget" href="https://ctftime.org/event/1057">Cyber Security Rumble</a></li><li><a class="rsswidget" href="https://ctftime.org/event/1076">DamCTF 2020</a></li></ul></div><div class="clear"></div></div>											
+					</div>
+					
+				</div><!-- .column-1 -->
+				
+							
+						
+				<div class="column column-2 one-third">
+				
+					<div class="widgets">
+			
+						
+		<div class="widget widget_recent_entries"><div class="widget-content">
+		<h3 class="widget-title">Recent Posts</h3>
+		<ul>
+											<li>
+					<a href="https://mystiko.sh/?p=772">Hackthebox – Remote</a>
+									</li>
+											<li>
+					<a href="https://mystiko.sh/?p=755">Weak</a>
+									</li>
+											<li>
+					<a href="https://mystiko.sh/?p=742">CMS</a>
+									</li>
+											<li>
+					<a href="https://mystiko.sh/?p=727">Shares</a>
+									</li>
+											<li>
+					<a href="https://mystiko.sh/?p=716">Engine</a>
+									</li>
+					</ul>
+
+		</div><div class="clear"></div></div>											
+					</div><!-- .widgets -->
+					
+				</div><!-- .column-2 -->
+				
+											
+						
+				<div class="column column-3 one-third">
+			
+					<div class="widgets">
+			
+						<div class="widget widget_calendar"><div class="widget-content"><h3 class="widget-title">Calendar</h3><div id="calendar_wrap" class="calendar_wrap"><table id="wp-calendar" class="wp-calendar-table">
+	<caption>September 2020</caption>
+	<thead>
+	<tr>
+		<th scope="col" title="Monday">M</th>
+		<th scope="col" title="Tuesday">T</th>
+		<th scope="col" title="Wednesday">W</th>
+		<th scope="col" title="Thursday">T</th>
+		<th scope="col" title="Friday">F</th>
+		<th scope="col" title="Saturday">S</th>
+		<th scope="col" title="Sunday">S</th>
+	</tr>
+	</thead>
+	<tbody>
+	<tr>
+		<td colspan="1" class="pad">&nbsp;</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td>
+	</tr>
+	<tr>
+		<td>7</td><td>8</td><td><a href="https://mystiko.sh/?m=20200909" aria-label="Posts published on September 9, 2020">9</a></td><td>10</td><td id="today">11</td><td>12</td><td>13</td>
+	</tr>
+	<tr>
+		<td>14</td><td>15</td><td>16</td><td>17</td><td>18</td><td>19</td><td>20</td>
+	</tr>
+	<tr>
+		<td>21</td><td>22</td><td>23</td><td>24</td><td>25</td><td>26</td><td>27</td>
+	</tr>
+	<tr>
+		<td>28</td><td>29</td><td>30</td>
+		<td class="pad" colspan="4">&nbsp;</td>
+	</tr>
+	</tbody>
+	</table><nav aria-label="Previous and next months" class="wp-calendar-nav">
+		<span class="wp-calendar-nav-prev"><a href="https://mystiko.sh/?m=202006">« Jun</a></span>
+		<span class="pad">&nbsp;</span>
+		<span class="wp-calendar-nav-next">&nbsp;</span>
+	</nav></div></div><div class="clear"></div></div>											
+					</div><!-- .widgets -->
+					
+				</div>
+				
+			<!-- .footer-c -->
+			
+			<div class="clear"></div>
+		
+		</div><!-- .section-inner -->
+
+	</div><!-- .footer -->
+
+
+<div class="credits section bg-dark small-padding">
+
+	<div class="credits-inner section-inner">
+
+		<p class="credits-left fleft">
+		
+			© 2020 <a href="https://mystiko.sh/">MYSTIKO</a><span> — Powered by <a href="http://www.wordpress.org/">WordPress</a></span>
+		
+		</p>
+		
+		<p class="credits-right fright">
+			
+			<span>Theme by <a href="https://www.andersnoren.se/">Anders Noren</a> — </span><a class="tothetop" href="#">Up ↑</a>
+			
+		</p>
+		
+		<div class="clear"></div>
+	
+	</div><!-- .credits-inner -->
+	
+</div><!-- .credits -->
+
+
+	<script>
+		jQuery(document).ready(function() {
+
+			// Get all thumbs containers
+			jQuery( ".thumbs-rating-container" ).each(function( index ) {
+
+			 	// Get data attribute
+			 	 var content_id = jQuery(this).data('content-id');
+
+			 	 var itemName = "thumbsrating"+content_id;
+
+			 	      // Check if this content has localstorage
+			 	 	if (localStorage.getItem(itemName)){
+
+						// Check if it's Up or Down vote
+						if ( localStorage.getItem("thumbsrating" + content_id + "-1") ){
+							jQuery(this).find('.thumbs-rating-up').addClass('thumbs-rating-voted');
+						}
+						if ( localStorage.getItem("thumbsrating" + content_id + "-0") ){
+							jQuery(this).find('.thumbs-rating-down').addClass('thumbs-rating-voted');
+						}
+					}
+			});
+		});
+	</script>
+
+	<div id="pum-374" class="pum pum-overlay pum-theme-368 pum-theme-default-theme popmake-overlay click_open" data-popmake="{&quot;id&quot;:374,&quot;slug&quot;:&quot;machine-voting&quot;,&quot;theme_id&quot;:368,&quot;cookies&quot;:[],&quot;triggers&quot;:[{&quot;type&quot;:&quot;click_open&quot;,&quot;settings&quot;:{&quot;extra_selectors&quot;:&quot;&quot;,&quot;cookie_name&quot;:null}}],&quot;mobile_disabled&quot;:null,&quot;tablet_disabled&quot;:null,&quot;meta&quot;:{&quot;display&quot;:{&quot;stackable&quot;:false,&quot;overlay_disabled&quot;:false,&quot;scrollable_content&quot;:false,&quot;disable_reposition&quot;:false,&quot;size&quot;:false,&quot;responsive_min_width&quot;:false,&quot;responsive_min_width_unit&quot;:false,&quot;responsive_max_width&quot;:false,&quot;responsive_max_width_unit&quot;:false,&quot;custom_width&quot;:false,&quot;custom_width_unit&quot;:false,&quot;custom_height&quot;:false,&quot;custom_height_unit&quot;:false,&quot;custom_height_auto&quot;:false,&quot;location&quot;:false,&quot;position_from_trigger&quot;:false,&quot;position_top&quot;:false,&quot;position_left&quot;:false,&quot;position_bottom&quot;:false,&quot;position_right&quot;:false,&quot;position_fixed&quot;:false,&quot;animation_type&quot;:false,&quot;animation_speed&quot;:false,&quot;animation_origin&quot;:false,&quot;overlay_zindex&quot;:false,&quot;zindex&quot;:false},&quot;close&quot;:{&quot;text&quot;:false,&quot;button_delay&quot;:false,&quot;overlay_click&quot;:false,&quot;esc_press&quot;:false,&quot;f4_press&quot;:false},&quot;click_open&quot;:[]}}" role="dialog" aria-hidden="true">
+
+	<div id="popmake-374" class="pum-container popmake theme-368 pum-responsive pum-responsive-medium responsive size-medium">
+
+				
+
+				
+
+		
+
+				<div class="pum-content popmake-content">
+			<div class="bootstrap-yop yop-poll-mc">
+							<div class="basic-yop-poll-container" style="background-color:#272822; border:1px; border-style:solid; border-color:#98ce00; border-radius:7px; padding:0px 0px;" data-id="1" data-temp="basic" data-skin="minimal" data-cscheme="black" data-cap="1" data-access="guest" data-tid="" data-uid="00daafefe10fcc3de6a72081acbdf172" data-resdet="percentages" data-show-results-to="guest" data-show-results-moment="after-vote" data-show-results-only="false" data-show-message="true" data-show-results-as="bar" data-sort-results-by="as-defined" data-sort-results-rule="asc" data-gdpr="no" data-gdpr-sol="consent" data-css=".basic-yop-poll-container[data-uid] .basic-vote {
+									text-align: center;
+								}" data-counter="0" data-load-with="1"><div class="row"><div class="col-md-12"><div class="basic-inner"><div class="basic-message hide" style="border-left: 10px solid #008000; padding: 0px 10px;" data-error="#ff0000" data-success="#008000"><p class="basic-message-text" style="color:#000000; font-size:14px; font-weight:normal;"></p></div><div class="basic-overlay hide"><div class="basic-vote-options"></div><div class="basic-preloader"><div class="basic-windows8"><div class="basic-wBall basic-wBall_1"><div class="basic-wInnerBall"></div></div><div class="basic-wBall basic-wBall_2"><div class="basic-wInnerBall"></div></div><div class="basic-wBall basic-wBall_3"><div class="basic-wInnerBall"></div></div><div class="basic-wBall basic-wBall_4"><div class="basic-wInnerBall"></div></div><div class="basic-wBall basic-wBall_5"><div class="basic-wInnerBall"></div></div></div></div></div><form class="basic-form"><input type="hidden" name="_token" value="2e2dc495d4"><div class="basic-elements"><div class="basic-element basic-question basic-question-text-vertical" data-id="1" data-uid="0d7996282fd010175e03e84162eb463d" data-type="question" data-question-type="text" data-min="1" data-max="1" data-display="vertical" data-colnum="" data-display-others="no" data-others-color="" data-others=""><div class="basic-question-title"><h5 style="color:#ffffff; font-size:14px; font-weight:normal; text-align:center;">Which box you want to do today?</h5></div><ul class="basic-answers"><li class="basic-answer" style="padding:0px 0px;" data-id="1" data-type="text" data-vn="0" data-color="#000000" data-make-link="no" data-link=""><div class="basic-answer-content basic-text-vertical"><label for="answer[1]" class="basic-answer-label"><input type="radio" id="answer[1]" name="answer[1]" value="1"><span class="basic-text" style="color: #ffffff; font-size: 14px; font-weight: normal;">Control</span></label></div></li><li class="basic-answer" style="padding:0px 0px;" data-id="5" data-type="text" data-vn="0" data-color="#000000" data-make-link="no" data-link=""><div class="basic-answer-content basic-text-vertical"><label for="answer[5]" class="basic-answer-label"><input type="radio" id="answer[5]" name="answer[1]" value="5"><span class="basic-text" style="color: #ffffff; font-size: 14px; font-weight: normal;">Scavenger</span></label></div></li><li class="basic-answer" style="padding:0px 0px;" data-id="6" data-type="text" data-vn="0" data-color="#000000" data-make-link="no" data-link=""><div class="basic-answer-content basic-text-vertical"><label for="answer[6]" class="basic-answer-label"><input type="radio" id="answer[6]" name="answer[1]" value="6"><span class="basic-text" style="color: #ffffff; font-size: 14px; font-weight: normal;">Zetta</span></label></div></li><li class="basic-answer" style="padding:0px 0px;" data-id="8" data-type="text" data-vn="0" data-color="#000000" data-make-link="no" data-link=""><div class="basic-answer-content basic-text-vertical"><label for="answer[8]" class="basic-answer-label"><input type="radio" id="answer[8]" name="answer[1]" value="8"><span class="basic-text" style="color: #ffffff; font-size: 14px; font-weight: normal;">Resolute</span></label></div></li><li class="basic-answer" style="padding:0px 0px;" data-id="9" data-type="text" data-vn="0" data-color="#000000" data-make-link="no" data-link=""><div class="basic-answer-content basic-text-vertical"><label for="answer[9]" class="basic-answer-label"><input type="radio" id="answer[9]" name="answer[1]" value="9"><span class="basic-text" style="color: #ffffff; font-size: 14px; font-weight: normal;">JSON</span></label></div></li><li class="basic-answer" style="padding:0px 0px;" data-id="10" data-type="text" data-vn="0" data-color="#000000" data-make-link="no" data-link=""><div class="basic-answer-content basic-text-vertical"><label for="answer[10]" class="basic-answer-label"><input type="radio" id="answer[10]" name="answer[1]" value="10"><span class="basic-text" style="color: #ffffff; font-size: 14px; font-weight: normal;">Registry</span></label></div></li><li class="basic-answer" style="padding:0px 0px;" data-id="21" data-type="text" data-vn="0" data-color="#000000" data-make-link="no" data-link=""><div class="basic-answer-content basic-text-vertical"><label for="answer[21]" class="basic-answer-label"><input type="radio" id="answer[21]" name="answer[1]" value="21"><span class="basic-text" style="color: #ffffff; font-size: 14px; font-weight: normal;">PlayerTwo</span></label></div></li><li class="basic-answer" style="padding:0px 0px;" data-id="22" data-type="text" data-vn="0" data-color="#000000" data-make-link="no" data-link=""><div class="basic-answer-content basic-text-vertical"><label for="answer[22]" class="basic-answer-label"><input type="radio" id="answer[22]" name="answer[1]" value="22"><span class="basic-text" style="color: #ffffff; font-size: 14px; font-weight: normal;">Rope</span></label></div></li><li class="basic-answer" style="padding:0px 0px;" data-id="23" data-type="text" data-vn="0" data-color="#000000" data-make-link="no" data-link=""><div class="basic-answer-content basic-text-vertical"><label for="answer[23]" class="basic-answer-label"><input type="radio" id="answer[23]" name="answer[1]" value="23"><span class="basic-text" style="color: #ffffff; font-size: 14px; font-weight: normal;">Obscurity</span></label></div></li><li class="basic-answer" style="padding:0px 0px;" data-id="24" data-type="text" data-vn="0" data-color="#000000" data-make-link="no" data-link=""><div class="basic-answer-content basic-text-vertical"><label for="answer[24]" class="basic-answer-label"><input type="radio" id="answer[24]" name="answer[1]" value="24"><span class="basic-text" style="color: #ffffff; font-size: 14px; font-weight: normal;">Bankrobber</span></label></div></li><li class="basic-answer" style="padding:0px 0px;" data-id="25" data-type="text" data-vn="0" data-color="#000000" data-make-link="no" data-link=""><div class="basic-answer-content basic-text-vertical"><label for="answer[25]" class="basic-answer-label"><input type="radio" id="answer[25]" name="answer[1]" value="25"><span class="basic-text" style="color: #ffffff; font-size: 14px; font-weight: normal;">Sniper</span></label></div></li><li class="basic-answer" style="padding:0px 0px;" data-id="26" data-type="text" data-vn="0" data-color="#000000" data-make-link="no" data-link=""><div class="basic-answer-content basic-text-vertical"><label for="answer[26]" class="basic-answer-label"><input type="radio" id="answer[26]" name="answer[1]" value="26"><span class="basic-text" style="color: #ffffff; font-size: 14px; font-weight: normal;">Forest</span></label></div></li><li class="basic-answer" style="padding:0px 0px;" data-id="27" data-type="text" data-vn="0" data-color="#000000" data-make-link="no" data-link=""><div class="basic-answer-content basic-text-vertical"><label for="answer[27]" class="basic-answer-label"><input type="radio" id="answer[27]" name="answer[1]" value="27"><span class="basic-text" style="color: #ffffff; font-size: 14px; font-weight: normal;">Mango</span></label></div></li><li class="basic-answer" style="padding:0px 0px;" data-id="28" data-type="text" data-vn="0" data-color="#000000" data-make-link="no" data-link=""><div class="basic-answer-content basic-text-vertical"><label for="answer[28]" class="basic-answer-label"><input type="radio" id="answer[28]" name="answer[1]" value="28"><span class="basic-text" style="color: #ffffff; font-size: 14px; font-weight: normal;">Postman</span></label></div></li><li class="basic-answer" style="padding:0px 0px;" data-id="30" data-type="text" data-vn="0" data-color="#000000" data-make-link="no" data-link=""><div class="basic-answer-content basic-text-vertical"><label for="answer[30]" class="basic-answer-label"><input type="radio" id="answer[30]" name="answer[1]" value="30"><span class="basic-text" style="color: #ffffff; font-size: 14px; font-weight: normal;">Traversexec</span></label></div></li><li class="basic-answer" style="padding:0px 0px;" data-id="31" data-type="text" data-vn="0" data-color="#000000" data-make-link="no" data-link=""><div class="basic-answer-content basic-text-vertical"><label for="answer[31]" class="basic-answer-label"><input type="radio" id="answer[31]" name="answer[1]" value="31"><span class="basic-text" style="color: #ffffff; font-size: 14px; font-weight: normal;">OpenAdmin</span></label></div></li><li class="basic-answer" style="padding:0px 0px;" data-id="32" data-type="text" data-vn="0" data-color="#000000" data-make-link="no" data-link=""><div class="basic-answer-content basic-text-vertical"><label for="answer[32]" class="basic-answer-label"><input type="radio" id="answer[32]" name="answer[1]" value="32"><span class="basic-text" style="color: #ffffff; font-size: 14px; font-weight: normal;">Monteverde</span></label></div></li><li class="basic-answer" style="padding:0px 0px;" data-id="33" data-type="text" data-vn="0" data-color="#000000" data-make-link="no" data-link=""><div class="basic-answer-content basic-text-vertical"><label for="answer[33]" class="basic-answer-label"><input type="radio" id="answer[33]" name="answer[1]" value="33"><span class="basic-text" style="color: #ffffff; font-size: 14px; font-weight: normal;">Patents</span></label></div></li><li class="basic-answer" style="padding:0px 0px;" data-id="34" data-type="text" data-vn="0" data-color="#000000" data-make-link="no" data-link=""><div class="basic-answer-content basic-text-vertical"><label for="answer[34]" class="basic-answer-label"><input type="radio" id="answer[34]" name="answer[1]" value="34"><span class="basic-text" style="color: #ffffff; font-size: 14px; font-weight: normal;">Nest</span></label></div></li></ul></div><div class="clearfix"></div></div><div id="yop-poll-captcha-00daafefe10fcc3de6a72081acbdf172" class="basic-captcha visualCaptcha"><input type="hidden" name="namespace" value="yop-poll-captcha-00daafefe10fcc3de6a72081acbdf172"><div class="visualCaptcha-accessibility-wrapper visualCaptcha-hide"><div class="accessibility-description">Type below the <strong>answer</strong> to what you hear. Numbers or words:</div><audio preload="preload"><source src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/app.mpga" type="audio/ogg"><source src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/app.mpga" type="audio/mpeg"></audio></div><p class="visualCaptcha-explanation">Click or touch the <strong>World</strong></p><div class="visualCaptcha-possibilities"><div class="img"><a href="#"><img src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/app_002.png" id="visualCaptcha-img-0" data-index="0" alt="" title=""></a></div><div class="img"><a href="#"><img src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/app_004.png" id="visualCaptcha-img-1" data-index="1" alt="" title=""></a></div><div class="img"><a href="#"><img src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/app_003.png" id="visualCaptcha-img-2" data-index="2" alt="" title=""></a></div><div class="img"><a href="#"><img src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/app.png" id="visualCaptcha-img-3" data-index="3" alt="" title=""></a></div><div class="img"><a href="#"><img src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/app_005.png" id="visualCaptcha-img-4" data-index="4" alt="" title=""></a></div></div><div class="visualCaptcha-button-group"><div class="visualCaptcha-refresh-button"><a href="#"><img src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/refresh.png" title="Refresh/reload: get new images and accessibility option!" alt="Refresh/reload icon"></a></div><div class="visualCaptcha-accessibility-button"><a href="#"><img src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/accessibility.png" title="Accessibility option: listen to a question and answer it!" alt="Sound icon"></a></div></div></div><div class="basic-vote"><a href="#" class="button basic-vote-button" style="background:#ffffff; border:1px; border-style: solid; border-color:#000000; border-radius:0px; padding:5px 10px; color:#000000; font-size:14px; font-weight:normal;">Vote</a></div><input type="hidden" name="pum_form_popup_id" value="374"></form></div></div></div></div>
+						</div>
+		</div>
+
+
+				
+
+				            <button type="button" class="pum-close popmake-close" aria-label="Close">
+			×            </button>
+		
+	</div>
+
+</div>
+<script type="text/javascript" src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/comment-reply.js" id="comment-reply-js"></script>
+<script type="text/javascript" src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/core.js" id="jquery-ui-core-js"></script>
+<script type="text/javascript" src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/position.js" id="jquery-ui-position-js"></script>
+<script type="text/javascript" id="popup-maker-site-js-extra">
+/* <![CDATA[ */
+var pum_vars = {"version":"1.11.2","pm_dir_url":"https:\/\/mystiko.sh\/wp-content\/plugins\/popup-maker\/","ajaxurl":"https:\/\/mystiko.sh\/wp-admin\/admin-ajax.php","restapi":"https:\/\/mystiko.sh\/index.php?rest_route=\/pum\/v1","rest_nonce":null,"default_theme":"368","debug_mode":"","disable_tracking":"","home_url":"\/","message_position":"top","core_sub_forms_enabled":"1","popups":[]};
+var ajaxurl = "https:\/\/mystiko.sh\/wp-admin\/admin-ajax.php";
+var pum_sub_vars = {"ajaxurl":"https:\/\/mystiko.sh\/wp-admin\/admin-ajax.php","message_position":"top"};
+var pum_popups = {"pum-374":{"disable_on_mobile":false,"disable_on_tablet":false,"custom_height_auto":false,"scrollable_content":false,"position_from_trigger":false,"position_fixed":false,"overlay_disabled":false,"stackable":false,"disable_reposition":false,"close_on_form_submission":false,"close_on_overlay_click":false,"close_on_esc_press":false,"close_on_f4_press":false,"disable_form_reopen":false,"disable_accessibility":false,"theme_slug":"default-theme","theme_id":368,"id":374,"slug":"machine-voting"}};
+/* ]]> */
+</script>
+<script type="text/javascript" src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/pum-site-scripts.js" id="popup-maker-site-js"></script>
+<script type="text/javascript" src="Attacking%20Kerberos%20%E2%80%93%20MYSTIKO_files/wp-embed.js" id="wp-embed-js"></script>
+
+
+</body></html>

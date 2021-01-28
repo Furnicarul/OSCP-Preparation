@@ -1,0 +1,32 @@
+.introjs-helperLayer {
+	background-color: #303235!important
+}
+
+.introjs-tooltip {
+	background: #303235!important
+}
+
+.introjs-tooltiptext {
+  color: #c3c3c3;
+}
+
+.introjs-button {
+	color: var(--hacker-green)!important;
+	background: rgba(0, 0, 0, .25)!important;
+	text-shadow: none!important;
+	text-decoration: none!important
+}
+
+.introjs-button:hover {
+	box-shadow: none!important
+}
+
+.introjs-disabled,
+.introjs-disabled:focus,
+.introjs-disabled:hover {
+	cursor: not-allowed!important
+}
+
+.introjs-bullets ul li a.active {
+	background: var(--hacker-green)!important
+}

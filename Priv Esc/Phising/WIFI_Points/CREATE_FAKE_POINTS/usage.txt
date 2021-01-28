@@ -1,0 +1,7 @@
+airmon-ng start (ip addr)
+create a wifi.lst file and type all the wifi names you want to create
+mdk3 interfata noua de pe ip addr de ex: wlan0 se transforma in wla0mon
+mdk3 (ex) b -c 1 -f wifi.lst
+And DONE iti creaza mai multe access pointuri FAKE
+
+airmon-ng stop wlan0mon
